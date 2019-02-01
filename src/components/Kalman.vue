@@ -1,47 +1,53 @@
 <template>
-  <div>
-    <p>Canvas</p>
-
-
-    <canvas ref="cont" width="500" height="500"></canvas>
-  </div>
+	<div >
+	<h2>kalman</h2>
+	<canvas @pointermove="mouseOver" ref="ccont" width="600" height="600"></canvas>
+	</div>
 </template>
 
 <script>
 export default {
-  data: function () {
-    return {
-      a: null
-    }
-  },
-  mounted () {
-    var c = this.$refs.cont;
-    var ctx = c.getContext("2d");
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0,0,500, 500);
-    ctx.fillStyle = 'white';
-    ctx.moveTo(0, 0);
-    ctx.lineTo(500, 100);
-    ctx.stroke();
+	data: () =>  ({
+		a: null,
+		ctx: null
+	}),
+	mounted () {
 
-  }
+		this.init();
+		this.frame();
+
+	},
+	methods: {
+		mouseOver(event){
+			let canvas = this.$refs.ccont;
+			var rect = canvas.getBoundingClientRect();
+
+			this.clientX = event.clientX - rect.left;
+			this.clientY = event.clientY - rect.top;
+		},
+		init() {
+			var c = this.$refs.ccont;
+			this.ctx = c.getContext("2d");
+		},
+		frame() {
+			let ctx = this.ctx
+			ctx.fillStyle = 'blue';
+			ctx.fillRect(0, 0, 600, 600);
+			
+
+			ctx.fillStyle = 'red';
+			ctx.fillRect(this.clientX, this.clientY,50,50);
+
+
+			setTimeout(this.frame, 1000/60);
+		}
+	}
 }
+
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+
 </style>
