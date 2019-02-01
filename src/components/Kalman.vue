@@ -14,6 +14,7 @@ export default {
 		ctx: null,
 		lastCalledTime: null,
 		fps: 0,
+		framecount: 0,
 	}),
 	mounted () {
 
@@ -23,6 +24,9 @@ export default {
 
 	},
 	methods: {
+		getRandomInt(max) {
+			return Math.floor(Math.random() * Math.floor(max));
+		},
 		mouseOver(event){
 			let canvas = this.$refs.ccont;
 			var rect = canvas.getBoundingClientRect();
@@ -35,20 +39,31 @@ export default {
 			this.ctx = c.getContext("2d");
 		},
 		frame() {
+			this.framecount++;
 			let ctx = this.ctx
-			ctx.fillStyle = 'blue';
-			ctx.fillRect(0, 0, 600, 600);
+			//ctx.fillStyle = 'blue';
+			//ctx.fillRect(0, 0, 600, 600);
 			
 
 			ctx.fillStyle = 'red';
 			ctx.fillRect(this.clientX, this.clientY,50,50);
 
+			ctx.fillStyle = 'green';
+			ctx.fillRect(this.getRandomInt(600), this.getRandomInt(600),50,50);
+
+			
+
+			// Compute the real framerate
 			let delta = (performance.now() - this.lastCalledTime)/1000;
 			this.lastCalledTime = performance.now();
 
-			this.fps = 1/delta;
+			// Update the fps counter every 5 rendered frames
+			// i.e. every 1000/fps * 5 milliseconds 
+			if (this.framecount % 5 == 0)
+				this.fps = 1/delta;
 
-			setTimeout(this.frame, 1000/60);
+			// Desired framerate
+			setTimeout(this.frame, 1000/1000);
 
 		}
 	}
