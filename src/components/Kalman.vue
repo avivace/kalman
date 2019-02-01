@@ -2,6 +2,8 @@
 	<div >
 	<h2>kalman</h2>
 	<canvas @pointermove="mouseOver" ref="ccont" width="600" height="600"></canvas>
+	<br><br><br>
+	{{ Number((fps).toFixed(0)) }} FPS
 	</div>
 </template>
 
@@ -9,12 +11,15 @@
 export default {
 	data: () =>  ({
 		a: null,
-		ctx: null
+		ctx: null,
+		lastCalledTime: null,
+		fps: 0,
 	}),
 	mounted () {
 
 		this.init();
 		this.frame();
+
 
 	},
 	methods: {
@@ -38,8 +43,13 @@ export default {
 			ctx.fillStyle = 'red';
 			ctx.fillRect(this.clientX, this.clientY,50,50);
 
+			let delta = (performance.now() - this.lastCalledTime)/1000;
+			this.lastCalledTime = performance.now();
+
+			this.fps = 1/delta;
 
 			setTimeout(this.frame, 1000/60);
+
 		}
 	}
 }
