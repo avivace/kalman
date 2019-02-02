@@ -5,6 +5,7 @@
 	<br><br><br>
 	{{ Number((fps).toFixed(0)) }} FPS
   {{ status }}
+  {{ states.length }}
 	</div>
 </template>
 
@@ -21,7 +22,8 @@ export default {
 		lastCalledTime: null,
 		fps: 0, // (Measured) framerate
 		framecount: 0,
-    status: "paused"
+    status: "paused",
+    states: []
 	}),
 	mounted () {
 
@@ -50,16 +52,66 @@ export default {
 			this.ctx = c.getContext("2d");
       this.ctx.fillStyle = 'blue';
       this.ctx.fillRect(0, 0, 600, 600);
+
+      this.State = class State {
+        constructor(realInput) {
+          this.realInput = realInput;
+          this.noisyInput = []
+          this.predictedPoint = null;
+          this.dead = false;
+        }
+
+        display() {
+          this.realInput.display()
+        }
+
+        update() {
+          this.realInput.update()
+          if (this.realInput.ttl == 0)
+            this.dead = true
+        }
+
+      }
+
+      this.Point = class Point {
+        constructor(x, y, ctx){
+          this.x = x;
+          this.y = y;
+          this.ttl = 600;
+          this.ctx = ctx;
+        }
+
+        display() {
+          this.ctx.fillStyle = 'red';
+          this.ctx.fillRect(this.x, this.y, 6, 6);
+          
+          
+          
+        }
+
+        update() {
+          this.ttl--;
+        }
+      }
+
 		},
 		frame() {
 			let ctx = this.ctx
+      this.ctx.fillStyle = 'blue';
+      this.ctx.fillRect(0, 0, 600, 600);
 
-			ctx.fillStyle = 'red';
-			ctx.fillRect(this.clientX, this.clientY,50,50);
+      let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx)
+      this.states.push(new this.State(a))
 
-			ctx.fillStyle = 'green';
-			ctx.fillRect(this.getRandomInt(600), this.getRandomInt(600),50,50);
-
+      this.states.forEach(function(state, i){
+        //console.log(i)
+        state.display();
+        state.update();
+        if (state.dead){
+            delete this.state
+            this.states.splice(i, 1)
+        }
+      }.bind(this))
 			
 
 			// Compute the real framerate
