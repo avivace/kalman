@@ -144,27 +144,40 @@ export default {
 		},
 		frame() {
 
+			let start = performance.now();
+
 			let ctx = this.ctx
-			this.ctx.fillStyle = "#37474f";
-			this.ctx.fillRect(0, 0, 600, 600);
+      this.ctx.fillStyle = 'blue';
+      this.ctx.fillRect(0, 0, 600, 600);
 
-			let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx)
-			let noiseX = (Math.random() * (50 + 1)) << 0
-			let noiseY = (Math.random() * (50 + 1)) << 0
-			let noisyA = new this.Point(this.clientX + noiseX - 25, this.clientY + noiseY - 25, ctx)
-			this.states.push(new this.State(a, noisyA))
+      let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx)
+      this.states.push(new this.State(a))
 
-			this.states.forEach(function(state, i) {
-				//console.log(i)
-				state.display();
-				state.update();
-				if (state.dead) {
-					delete this.state
-					this.states.splice(i, 1)
-				}
-			}.bind(this))
+      this.states.forEach(function(state, i){
+        //console.log(i)
+        state.display();
+        state.update();
+        if (state.dead){
+            this.states.splice(i, 1)
+        }
+      }.bind(this))
+			
 
-			requestAnimationFrame(this.frame)
+			// Compute the real framerate
+			let delta = (performance.now() - this.lastCalledTime)/1000;
+			this.lastCalledTime = performance.now();
+
+			// Update the fps counter every 5 rendered frames
+			// i.e. every 1000/expectedFrameRate * 5 milliseconds 
+			if (this.framecount % 5 == 0){
+				this.fps = 1/delta;
+        this.framecount = 0;
+      }	
+      // We done
+      this.framecount++;
+			// See ya in 1000/desiredFramerate milliseconds
+			let ms = performance.now() - start;
+			setTimeout(this.frame, 1000/this.framerate - ms);
 
 		}
 	}
