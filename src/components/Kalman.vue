@@ -96,6 +96,8 @@ export default {
 
 		},
 		frame() {
+			let start = performance.now();
+
 			let ctx = this.ctx
       this.ctx.fillStyle = 'blue';
       this.ctx.fillRect(0, 0, 600, 600);
@@ -108,7 +110,6 @@ export default {
         state.display();
         state.update();
         if (state.dead){
-            delete this.state
             this.states.splice(i, 1)
         }
       }.bind(this))
@@ -123,11 +124,12 @@ export default {
 			if (this.framecount % 5 == 0){
 				this.fps = 1/delta;
         this.framecount = 0;
-      }
+      }	
       // We done
       this.framecount++;
 			// See ya in 1000/desiredFramerate milliseconds
-			setTimeout(this.frame, 1000/this.framerate);
+			let ms = performance.now() - start;
+			setTimeout(this.frame, 1000/this.framerate - ms);
 
 		}
 	}
