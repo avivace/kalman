@@ -4,30 +4,30 @@
 	</div>
 </template>
 <script>
-import Kalman from './components/Kalman.vue'
+import Kalman from "./components/Kalman.vue";
 
 export default {
-	name: 'app',
+	name: "app",
 	components: {
 		Kalman
 	}
-}
+};
 </script>
 <style>
-@import url('https://rsms.me/inter/inter.css');
+@import url("https://rsms.me/inter/inter.css");
 
 html {
-	font-family: 'Inter', sans-serif;
+	font-family: "Inter", sans-serif;
 }
 
 @supports (font-variation-settings: normal) {
 	html {
-		font-family: 'Inter var', sans-serif;
+		font-family: "Inter var", sans-serif;
 	}
 }
 
 #app {
-	font-family: 'Inter', 'Avenir', Helvetica, Arial, sans-serif;
+	font-family: "Inter", "Avenir", Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;

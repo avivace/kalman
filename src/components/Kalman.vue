@@ -2,10 +2,16 @@
 	<div>
 		<h2 class="title">Kalman Filter demo</h2>
 		<h3 class="subtitle">Antonio Vivace, May 2019</h3>
-		<canvas @mouseleave="mouseLeave" @pointermove="mouseOver" ref="ccont" :width="width" :height="height"></canvas>
-		<br><br><br>
+		<canvas
+			@mouseleave="mouseLeave"
+			@pointermove="mouseOver"
+			ref="ccont"
+			:width="width"
+			:height="height"
+		></canvas>
+		<br /><br /><br />
 		<span class="stats">
-			{{ Number((fps).toFixed(0)) }} FPS
+			{{ Number(fps.toFixed(0)) }} FPS
 			{{ status }}
 			{{ states.length }}
 		</span>
@@ -23,24 +29,23 @@ export default {
 		fps: 0, // (Measured) framerate
 		framecount: 0,
 		status: "paused",
-		states: []
+		states: [],
+		framerate: 60
 	}),
 	mounted() {
-
 		this.init();
 		this.frame();
-
 	},
 	methods: {
 		getRandomInt(max) {
 			return Math.floor(Math.random() * Math.floor(max));
 		},
 		mouseLeave() {
-			console.log("Mouse left, stopping")
-			this.status = "paused"
+			console.log("Mouse left, stopping");
+			this.status = "paused";
 		},
 		mouseOver(event) {
-			this.status = "running"
+			this.status = "running";
 			let canvas = this.$refs.ccont;
 			var rect = canvas.getBoundingClientRect();
 
@@ -92,7 +97,6 @@ export default {
 				[0, 0, 0, 0]
 			]);
 
-			console.log(A)
 			var c = this.$refs.ccont;
 			this.ctx = c.getContext("2d", { alpha: false });
 			this.ctx.fillStyle = "#37474f";
@@ -107,18 +111,16 @@ export default {
 				}
 
 				display() {
-					this.realInput.display("red")
-					this.noisyInput.display("#558b2f")
+					this.realInput.display("blue");
+					this.noisyInput.display("#558b2f");
 				}
 
 				update() {
-					this.realInput.update()
-					this.noisyInput.update()
-					if (this.realInput.ttl == 0)
-						this.dead = true
+					this.realInput.update();
+					this.noisyInput.update();
+					if (this.realInput.ttl == 0) this.dead = true;
 				}
-
-			}
+			};
 
 			this.Point = class Point {
 				constructor(x, y, ctx) {
@@ -131,57 +133,42 @@ export default {
 				display(color) {
 					this.ctx.fillStyle = color;
 					this.ctx.fillRect(this.x, this.y, 5, 5);
-
-
-
 				}
 
 				update() {
 					this.ttl--;
 				}
-			}
-
+			};
 		},
 		frame() {
-
 			let start = performance.now();
 
-			let ctx = this.ctx
-      this.ctx.fillStyle = 'blue';
-      this.ctx.fillRect(0, 0, 600, 600);
+			let ctx = this.ctx;
+			this.ctx.fillStyle = "black";
+			this.ctx.fillRect(0, 0, 600, 600);
 
-      let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx)
-      this.states.push(new this.State(a))
+			let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
+			this.states.push(new this.State(a, a));
 
-      this.states.forEach(function(state, i){
-        //console.log(i)
-        state.display();
-        state.update();
-        if (state.dead){
-            this.states.splice(i, 1)
-        }
-      }.bind(this))
-			
+			this.states.forEach(
+				function(state, i) {
+					//console.log(i)
+					state.display();
+					state.update();
+					if (state.dead) {
+						this.states.splice(i, 1);
+					}
+				}.bind(this)
+			);
 
-			// Compute the real framerate
-			let delta = (performance.now() - this.lastCalledTime)/1000;
 			this.lastCalledTime = performance.now();
 
-			// Update the fps counter every 5 rendered frames
-			// i.e. every 1000/expectedFrameRate * 5 milliseconds 
-			if (this.framecount % 5 == 0){
-				this.fps = 1/delta;
-        this.framecount = 0;
-      }	
-      // We done
-      this.framecount++;
 			// See ya in 1000/desiredFramerate milliseconds
 			let ms = performance.now() - start;
-			setTimeout(this.frame, 1000/this.framerate - ms);
-
+			setTimeout(this.frame, 1000 / this.framerate - ms);
 		}
 	}
-}
+};
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
