@@ -14,7 +14,7 @@ export default {
 };
 </script>
 <style>
-@import url("https://rsms.me/inter/inter.css");
+@import "~inter-ui/inter-hinted.css";
 
 html {
 	font-family: "Inter", sans-serif;
