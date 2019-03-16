@@ -10,19 +10,21 @@
 			:height="height"
 		></canvas>
 		<br /><br /><br />
+		<!--
 		<span class="stats">
 			{{ Number(fps.toFixed(0)) }} FPS
 			{{ status }}
 			{{ states.length }}
 		</span>
+		-->
 	</div>
 </template>
 <script>
 export default {
 	data: () => ({
 		// Canvas size
-		width: 600,
-		height: 600,
+		width: 800,
+		height: 800,
 		ctx: null,
 		// Performance
 		lastCalledTime: null,
@@ -53,44 +55,49 @@ export default {
 			this.clientY = event.clientY - rect.top;
 		},
 		init() {
-			var A = window.$M([
+			// Sylvester is available under the window context, since we imported 
+			//  it globally in the html template.
+			let m = window.$M;
+			let v = window.$V;
+
+			var A = m([
 				[1, 0, 0.2, 0],
 				[0, 1, 0, 0.2],
 				[0, 0, 1, 0],
 				[0, 0, 0, 1]
 			]);
 
-			var B = window.$M([
+			var B = m([
 				[1, 0, 0, 0],
 				[0, 1, 0, 0],
 				[0, 0, 1, 0],
 				[0, 0, 0, 1]
 			]);
 
-			var H = window.$M([
+			var H = m([
 				[1, 0, 0, 0],
 				[0, 1, 0, 0],
 				[0, 0, 1, 0],
 				[0, 0, 0, 1]
 			]);
 
-			var Q = window.$M([
+			var Q = m([
 				[0.001, 0, 0, 0],
 				[0, 0.001, 0, 0],
 				[0, 0, 0, 0],
 				[0, 0, 0, 0]
 			]);
 
-			var R = window.$M([
+			var R = m([
 				[0.1, 0, 0, 0],
 				[0, 0.1, 0, 0],
 				[0, 0, 0.1, 0],
 				[0, 0, 0, 0.1]
 			]);
 
-			var last_x = window.$V([0, 0, 0, 0]);
+			var last_x = v([0, 0, 0, 0]);
 
-			var last_P = window.$M([
+			var last_P = m([
 				[0, 0, 0, 0],
 				[0, 0, 0, 0],
 				[0, 0, 0, 0],
@@ -100,7 +107,7 @@ export default {
 			var c = this.$refs.ccont;
 			this.ctx = c.getContext("2d", { alpha: false });
 			this.ctx.fillStyle = "#37474f";
-			this.ctx.fillRect(0, 0, 600, 600);
+			this.ctx.fillRect(0, 0, 800, 800);
 
 			this.State = class State {
 				constructor(realInput, noisyInput) {
@@ -111,7 +118,7 @@ export default {
 				}
 
 				display() {
-					this.realInput.display("blue");
+					//this.realInput.display("blue");
 					this.noisyInput.display("#558b2f");
 				}
 
@@ -132,7 +139,7 @@ export default {
 
 				display(color) {
 					this.ctx.fillStyle = color;
-					this.ctx.fillRect(this.x, this.y, 5, 5);
+					this.ctx.fillRect(this.x, this.y, 3, 3);
 				}
 
 				update() {
@@ -144,11 +151,18 @@ export default {
 			let start = performance.now();
 
 			let ctx = this.ctx;
-			this.ctx.fillStyle = "black";
-			this.ctx.fillRect(0, 0, 600, 600);
+			this.ctx.fillStyle = "#000a12";
+			this.ctx.fillRect(0, 0, 800, 800);
 
+			let maxNoise = 75
+
+			// Real point
 			let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
-			this.states.push(new this.State(a, a));
+			// Noisy input
+			let n = new this.Point(this.clientX + this.getRandomInt(maxNoise) - maxNoise/2,
+								   this.clientY + this.getRandomInt(maxNoise) - maxNoise/2, ctx)
+
+			this.states.push(new this.State(a, n));
 
 			this.states.forEach(
 				function(state, i) {
