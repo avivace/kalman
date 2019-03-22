@@ -119,6 +119,7 @@ export default {
 
 				display() {
 					//this.realInput.display("blue");
+					this.noisyInput.ttl;
 					this.noisyInput.display("#558b2f");
 				}
 
@@ -137,9 +138,13 @@ export default {
 					this.ctx = ctx;
 				}
 
-				display(color) {
-					this.ctx.fillStyle = color;
-					this.ctx.fillRect(this.x, this.y, 3, 3);
+				display(color, opacity) {
+					// Map remaining TTL to 0-255, and use it as Alpha channel (ttl -> 0, alpha -> 1)
+
+					let alpha = Math.round(this.ttl * 255/520).toString(16)
+					
+					this.ctx.fillStyle = color + alpha;
+					this.ctx.fillRect(this.x, this.y, 4, 4);
 				}
 
 				update() {
@@ -151,7 +156,7 @@ export default {
 			let start = performance.now();
 
 			let ctx = this.ctx;
-			this.ctx.fillStyle = "#000a12";
+			this.ctx.fillStyle = "#000f12";
 			this.ctx.fillRect(0, 0, 800, 800);
 
 			let maxNoise = 75
