@@ -118,7 +118,7 @@ export default {
 				}
 
 				display() {
-					//this.realInput.display("blue");
+					this.realInput.display("#0000ff");
 					this.noisyInput.ttl;
 					this.noisyInput.display("#558b2f");
 				}
@@ -138,13 +138,16 @@ export default {
 					this.ctx = ctx;
 				}
 
-				display(color, opacity) {
-					// Map remaining TTL to 0-255, and use it as Alpha channel (ttl -> 0, alpha -> 1)
+				display(color) {
+					// Map remaining TTL to 0-255, convert it to two hex digits
+					//  and use it as Alpha channel (ttl -> 0, alpha -> 1)
 
 					let alpha = Math.round(this.ttl * 255/520).toString(16)
-					
+					this.ctx.beginPath();
+					this.ctx.arc(this.x, this.y, 2, 0, 2*Math.PI)
 					this.ctx.fillStyle = color + alpha;
-					this.ctx.fillRect(this.x, this.y, 4, 4);
+					this.ctx.fill();
+					//this.ctx.fillRect(this.x, this.y, 4, 4);
 				}
 
 				update() {
