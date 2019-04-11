@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h2 class="title">Kalman Filter demo</h2>
+		<h2 class="title">Kalman Filter 2D demo</h2>
 		<h3 class="subtitle">Antonio Vivace, May 2019</h3>
 		<canvas
 			@mouseleave="mouseLeave"
@@ -10,21 +10,19 @@
 			:height="height"
 		></canvas>
 		<br /><br /><br />
-		<!--
+		
 		<span class="stats">
-			{{ Number(fps.toFixed(0)) }} FPS
-			{{ status }}
-			{{ states.length }}
+			{{ status }}, <code>{{ states.length }}</code> states drawn
 		</span>
-		-->
+		
 	</div>
 </template>
 <script>
 export default {
 	data: () => ({
 		// Canvas size
-		width: 800,
-		height: 800,
+		width: 600,
+		height: 600,
 		ctx: null,
 		// Performance
 		lastCalledTime: null,
@@ -32,7 +30,14 @@ export default {
 		framecount: 0,
 		status: "paused",
 		states: [],
-		framerate: 60
+		framerate: 60,
+		lastPoint: null,
+		A: null,
+		B: null,
+		H: null,
+		Q: null,
+		R: null,
+		last: null
 	}),
 	mounted() {
 		this.init();
@@ -43,7 +48,6 @@ export default {
 			return Math.floor(Math.random() * Math.floor(max));
 		},
 		mouseLeave() {
-			console.log("Mouse left, stopping");
 			this.status = "paused";
 		},
 		mouseOver(event) {
@@ -60,44 +64,40 @@ export default {
 			let m = window.$M;
 			let v = window.$V;
 
-			var A = m([
+			// State Transition
+			this.A = m([
 				[1, 0, 0.2, 0],
 				[0, 1, 0, 0.2],
 				[0, 0, 1, 0],
 				[0, 0, 0, 1]
 			]);
 
-			var B = m([
+			// Input Control Matrix is ignored
+
+			this.H = m([
 				[1, 0, 0, 0],
 				[0, 1, 0, 0],
 				[0, 0, 1, 0],
 				[0, 0, 0, 1]
 			]);
 
-			var H = m([
-				[1, 0, 0, 0],
-				[0, 1, 0, 0],
-				[0, 0, 1, 0],
-				[0, 0, 0, 1]
-			]);
-
-			var Q = m([
+			this.Q = m([
 				[0.001, 0, 0, 0],
 				[0, 0.001, 0, 0],
 				[0, 0, 0, 0],
 				[0, 0, 0, 0]
 			]);
 
-			var R = m([
+			this.R = m([
 				[0.1, 0, 0, 0],
 				[0, 0.1, 0, 0],
 				[0, 0, 0.1, 0],
 				[0, 0, 0, 0.1]
 			]);
 
-			var last_x = v([0, 0, 0, 0]);
+			this.lastPoint = v([0, 0, 0, 0])
 
-			var last_P = m([
+			this.last = m([
 				[0, 0, 0, 0],
 				[0, 0, 0, 0],
 				[0, 0, 0, 0],
@@ -107,18 +107,19 @@ export default {
 			var c = this.$refs.ccont;
 			this.ctx = c.getContext("2d", { alpha: false });
 			this.ctx.fillStyle = "#37474f";
-			this.ctx.fillRect(0, 0, 800, 800);
+			this.ctx.fillRect(0, 0, 600, 600);
 
 			this.State = class State {
-				constructor(realInput, noisyInput) {
+				constructor(realInput, noisyInput, kalmanPoint) {
 					this.realInput = realInput;
 					this.noisyInput = noisyInput;
-					this.predictedPoint = null;
+					this.kalmanPoint = kalmanPoint;
 					this.dead = false;
 				}
 
 				display() {
 					this.realInput.display("#0000ff");
+					this.kalmanPoint.display("#ff0000");
 					this.noisyInput.ttl;
 					this.noisyInput.display("#558b2f");
 				}
@@ -126,6 +127,7 @@ export default {
 				update() {
 					this.realInput.update();
 					this.noisyInput.update();
+					this.kalmanPoint.update();
 					if (this.realInput.ttl == 0) this.dead = true;
 				}
 			};
@@ -157,35 +159,86 @@ export default {
 		},
 		frame() {
 			let start = performance.now();
+			if (this.status == "running"){
+				let v = window.$V;
+				
+				
 
-			let ctx = this.ctx;
-			this.ctx.fillStyle = "#000f12";
-			this.ctx.fillRect(0, 0, 800, 800);
+				let ctx = this.ctx;
+				this.ctx.fillStyle = "#000f12";
+				this.ctx.fillRect(0, 0, 600, 600);
 
-			let maxNoise = 75
+				let maxNoise = 75
 
-			// Real point
-			let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
-			// Noisy input
-			let n = new this.Point(this.clientX + this.getRandomInt(maxNoise) - maxNoise/2,
-								   this.clientY + this.getRandomInt(maxNoise) - maxNoise/2, ctx)
+				// Real point
+				let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
+				// Noisy input
+				let noisyX = Math.round(this.clientX + this.getRandomInt(maxNoise) - maxNoise/2)
+				let noisyY = Math.round(this.clientY + this.getRandomInt(maxNoise) - maxNoise/2)
+				let n = new this.Point(noisyX, noisyY, ctx)
 
-			this.states.push(new this.State(a, n));
+				let deltaX = noisyX - this.lastPoint.elements[0];
+				let deltaY = noisyY - this.lastPoint.elements[1];
 
-			this.states.forEach(
-				function(state, i) {
-					//console.log(i)
-					state.display();
-					state.update();
-					if (state.dead) {
-						this.states.splice(i, 1);
-					}
-				}.bind(this)
-			);
+				/*
+				
+				Kalman things
 
+				m = [noisyX, noisyY, deltaX, deltaY]
+
+				Prediction Step:
+				x = (A * x) + (B * c)
+				P = (A * P * AT) + Q
+
+				Correction Step:
+				S = (H * P * HT) + R 
+				K = P * HT * S-1
+				y = m - (H * x)
+				x = x + (K * y)
+				P = (I - (K * H)) * P
+				
+				We ignore the control vector (c) and the Input Control Matrix (B)
+
+				*/
+
+				let measurement = v([noisyX, noisyY, deltaX, deltaY]);
+				
+
+				// PREDICTION step
+				var x = this.A.multiply(this.lastPoint)
+				var P = ((this.A.multiply(this.last)).multiply(this.A.transpose())).add(this.Q); 
+
+				// CORRECTION step
+				var S = ((this.H.multiply(P)).multiply(this.H.transpose())).add(this.R);
+				var K = (P.multiply(this.H.transpose())).multiply(S.inverse());
+				var y = measurement.subtract(this.H.multiply(x));
+
+				this.lastPoint = x.add(K.multiply(y));
+				this.last = ((window.Matrix.I(4)).subtract(K.multiply(this.H))).multiply(P);
+
+				// ---
+
+
+				let k = new this.Point(this.lastPoint.elements[0], this.lastPoint.elements[1], ctx)
+
+				this.states.push(new this.State(a, n, k));
+
+				this.states.forEach(
+					function(state, i) {
+						state.display();
+						state.update();
+						if (state.dead) {
+							this.states.splice(i, 1);
+						}
+					}.bind(this)
+				);
+
+				
+
+				// See ya in 1000/desiredFramerate milliseconds
+
+			}
 			this.lastCalledTime = performance.now();
-
-			// See ya in 1000/desiredFramerate milliseconds
 			let ms = performance.now() - start;
 			setTimeout(this.frame, 1000 / this.framerate - ms);
 		}
