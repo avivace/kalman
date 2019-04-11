@@ -2,7 +2,7 @@
 	<div>
 		<h2 class="title">Kalman Filter 2D demo</h2>
 		<h3 class="subtitle">Antonio Vivace, May 2019</h3>
-		<canvas
+		<canvas class="kalmandemo"
 			@mouseleave="mouseLeave"
 			@pointermove="mouseOver"
 			ref="ccont"
@@ -118,7 +118,7 @@ export default {
 				}
 
 				display() {
-					this.realInput.display("#0000ff");
+					//this.realInput.display("#0000ff");
 					this.kalmanPoint.display("#ff0000");
 					this.noisyInput.ttl;
 					this.noisyInput.display("#558b2f");
@@ -263,5 +263,9 @@ export default {
 	font-size: 1.7rem;
 	letter-spacing: -0.07em;
 	line-height: 0;
+}
+
+.kalmandemo {
+	box-shadow: 0 27.125px 50px -12.125px rgba(0,0,0,0.4);
 }
 </style>
