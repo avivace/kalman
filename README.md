@@ -19,7 +19,7 @@ Deploy to `avivace.github.io/kalman`:
 npm run deploy
 ```
 
-    Development is done on the `develop` branch due to GitHub's restriction on branches for user pages (the build is deployed on the `master` branch and deployed to `avivace.github.io/kalman` from there).
+> Development is done on the `develop` branch due to GitHub's restriction on branches for user pages (the build is deployed on the `master` branch and deployed to `avivace.github.io/kalman` from there).
 
 ### References
 
