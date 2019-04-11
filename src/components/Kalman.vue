@@ -9,9 +9,12 @@
 		Height
 		<input type="range" min="0" :max="1000" value="75" class="slider" v-model="height">
 		{{ height }}px
-		maxNoise
-		<input type="range" min="0" :max="width/3" value="75" class="slider" v-model="maxNoise">
-		 {{ maxNoise }}
+
+
+		<mu-container>
+			Max Noise: {{ maxNoise }}
+			<mu-slider :min="0" :max="width/3" :step=1 class="demo-slider" v-model="maxNoise"></mu-slider>
+		</mu-container>
 
 		<br><br>
 		<canvas class="kalmandemo"
@@ -151,7 +154,7 @@ export default {
 				constructor(x, y, ctx) {
 					this.x = x;
 					this.y = y;
-					this.ttl = 350;
+					this.ttl = 50;
 					this.ctx = ctx;
 				}
 
@@ -159,7 +162,7 @@ export default {
 					// Map remaining TTL to 0-255, convert it to two hex digits
 					//  and use it as Alpha channel (ttl -> 0, alpha -> 1)
 
-					let alpha = Math.round(this.ttl * 255/350).toString(16)
+					let alpha = Math.round(this.ttl * 255/50).toString(16)
 					this.ctx.beginPath();
 					this.ctx.arc(this.x, this.y, 2, 0, 2*Math.PI)
 					this.ctx.fillStyle = color + alpha;
