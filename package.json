@@ -5,7 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy-gh-pages": "npx gh-pages -d dist -b master",
+    "deploy": "npx vue-cli-service build && npm run deploy-gh-pages"
+
   },
   "dependencies": {
     "vue": "^2.5.22"
