@@ -2,6 +2,18 @@
 	<div>
 		<h2 class="title">Kalman Filter 2D demo</h2>
 		<h3 class="subtitle">Antonio Vivace, May 2019</h3>
+		
+		Width
+		<input type="range" min="0" :max="1800" value="75" class="slider" v-model="width">
+		{{ width }}px
+		Height
+		<input type="range" min="0" :max="1000" value="75" class="slider" v-model="height">
+		{{ height }}px
+		maxNoise
+		<input type="range" min="0" :max="width/3" value="75" class="slider" v-model="maxNoise">
+		 {{ maxNoise }}
+
+		<br><br>
 		<canvas class="kalmandemo"
 			@mouseleave="mouseLeave"
 			@pointermove="mouseOver"
@@ -14,7 +26,9 @@
 		<span class="stats">
 			{{ status }}, <code>{{ states.length }}</code> states drawn
 		</span>
-		
+	<small >
+	<p><b><a href="https://github.com/avivace/kalman">Source code</a></b></p>
+	</small>
 	</div>
 </template>
 <script>
@@ -37,7 +51,8 @@ export default {
 		H: null,
 		Q: null,
 		R: null,
-		last: null
+		last: null,
+		maxNoise: 75,
 	}),
 	mounted() {
 		this.init();
@@ -107,7 +122,7 @@ export default {
 			var c = this.$refs.ccont;
 			this.ctx = c.getContext("2d", { alpha: false });
 			this.ctx.fillStyle = "#37474f";
-			this.ctx.fillRect(0, 0, 600, 600);
+			this.ctx.fillRect(0, 0, this.width, this.height);
 
 			this.State = class State {
 				constructor(realInput, noisyInput, kalmanPoint) {
@@ -165,10 +180,10 @@ export default {
 				
 
 				let ctx = this.ctx;
-				this.ctx.fillStyle = "#000f12";
-				this.ctx.fillRect(0, 0, 600, 600);
+				this.ctx.fillStyle = "#263238";
+				this.ctx.fillRect(0, 0, this.width, this.height);
 
-				let maxNoise = 75
+				let maxNoise = this.maxNoise
 
 				// Real point
 				let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
@@ -247,8 +262,11 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+a {
+	text-decoration: none;
+}
 .stats {
-	font-size: 1.5rem;
+	font-size: 1.2rem;
 }
 
 .title {
@@ -268,4 +286,5 @@ export default {
 .kalmandemo {
 	box-shadow: 0 27.125px 50px -12.125px rgba(0,0,0,0.4);
 }
+
 </style>
