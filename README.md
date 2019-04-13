@@ -3,7 +3,7 @@
 
 ### [Live demo](https://avivace.github.io/kalman)
 
-Final project for the *Probabilistic Models for decision making* course, from my MSc.
+Final project for the *Probabilistic models for decision making* course, from my MSc. An interactive 2D simulation of the Kalman Filter in use to reduce input noise
 
 ### Deploy
 
@@ -23,10 +23,10 @@ npm run deploy
 
 ### Stack
 
-- [Vue.js](https://vuejs.org/) JS framework
-- [MuseUI](https://muse-ui.org) CSS framework
-- [Sylvester](http://sylvester.jcoglan.com/) JS vector and matrix math
-- [CanvasRenderingContext2D web API](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) to draw the simulation
+- [Vue.js](https://vuejs.org/) JS framework;
+- [MuseUI](https://muse-ui.org) CSS framework;
+- [Sylvester](http://sylvester.jcoglan.com/) Vector and matrix math;
+- [CanvasRenderingContext2D web API](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) to draw the simulation.
 
 ### References
 
