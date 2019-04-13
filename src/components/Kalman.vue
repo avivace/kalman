@@ -154,7 +154,7 @@ export default {
 				constructor(x, y, ctx) {
 					this.x = x;
 					this.y = y;
-					this.ttl = 50;
+					this.ttl = 200;
 					this.ctx = ctx;
 				}
 
@@ -162,7 +162,7 @@ export default {
 					// Map remaining TTL to 0-255, convert it to two hex digits
 					//  and use it as Alpha channel (ttl -> 0, alpha -> 1)
 
-					let alpha = Math.round(this.ttl * 255/50).toString(16)
+					let alpha = Math.round(this.ttl * 255/200).toString(16)
 					this.ctx.beginPath();
 					this.ctx.arc(this.x, this.y, 2, 0, 2*Math.PI)
 					this.ctx.fillStyle = color + alpha;
