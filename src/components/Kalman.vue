@@ -190,72 +190,70 @@ export default {
 
 				// Real point
 				let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
-				// Noisy input
+				// Add noise to the clean input
 				let noisyX = Math.round(this.clientX + this.getRandomInt(maxNoise) - maxNoise/2)
 				let noisyY = Math.round(this.clientY + this.getRandomInt(maxNoise) - maxNoise/2)
+
 				let n = new this.Point(noisyX, noisyY, ctx)
 
-				let deltaX = noisyX - this.lastPoint.elements[0];
-				let deltaY = noisyY - this.lastPoint.elements[1];
 
-				/*
-				
-				Kalman things
 
-				m = [noisyX, noisyY, deltaX, deltaY]
+				/* 
 
-				Prediction Step:
-				x = (A * x) + (B * c)
-				P = (A * P * AT) + Q
+				KALMAN FILTER implementation
 
-				Correction Step:
-				S = (H * P * HT) + R 
-				K = P * HT * S-1
-				y = m - (H * x)
-				x = x + (K * y)
-				P = (I - (K * H)) * P
-				
 				We ignore the control vector (c) and the Input Control Matrix (B)
 
 				*/
 
+				// m = [noisyX, noisyY, deltaX, deltaY]
+				let deltaX = noisyX - this.lastPoint.elements[0];
+				let deltaY = noisyY - this.lastPoint.elements[1];
 				let measurement = v([noisyX, noisyY, deltaX, deltaY]);
 				
 
 				// PREDICTION step
+				// x = (A * x) + (B * c)
 				var x = this.A.multiply(this.lastPoint)
+				// P = (A * P * AT) + Q
 				var P = ((this.A.multiply(this.last)).multiply(this.A.transpose())).add(this.Q); 
 
 				// CORRECTION step
+				// S = (H * P * HT) + R 
 				var S = ((this.H.multiply(P)).multiply(this.H.transpose())).add(this.R);
+				// K = P * HT * S-1
 				var K = (P.multiply(this.H.transpose())).multiply(S.inverse());
+				// y = m - (H * x)
 				var y = measurement.subtract(this.H.multiply(x));
 
+				// x = x + (K * y)
+				//  this is the final filtered point for this iteration
 				this.lastPoint = x.add(K.multiply(y));
+				// P = (I - (K * H)) * P
 				this.last = ((window.Matrix.I(4)).subtract(K.multiply(this.H))).multiply(P);
 
 				// ---
 
-
 				let k = new this.Point(this.lastPoint.elements[0], this.lastPoint.elements[1], ctx)
 
+				// Push the final state (real, noisy, filtered)
 				this.states.push(new this.State(a, n, k));
 
+				// Draw every state in the stack, and kill the older ones
 				this.states.forEach(
 					function(state, i) {
 						state.display();
 						state.update();
 						if (state.dead) {
+							// FIXME
+							// This is probably bad, as splice keeps the references (citation needed)
+							// check this https://stackoverflow.com/questions/33162534/javascript-arguments-leak-var-array-slice-call
 							this.states.splice(i, 1);
 						}
 					}.bind(this)
 				);
-
-				
-
-				// See ya in 1000/desiredFramerate milliseconds
-
 			}
+			// See ya in 1000/desiredFramerate milliseconds
 			this.lastCalledTime = performance.now();
 			let ms = performance.now() - start;
 			setTimeout(this.frame, 1000 / this.framerate - ms);
