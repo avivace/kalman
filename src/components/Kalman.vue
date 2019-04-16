@@ -27,7 +27,7 @@
 		<br /><br /><br />
 		
 		<span class="stats">
-			{{ status }}, <code>{{ states.length }}</code> states drawn
+			{{ status }}, <code>{{ states.length }}</code> states drawn. {{ ms }}
 		</span>
 	<small >
 	<p><b><a href="https://github.com/avivace/kalman">Source code</a></b></p>
@@ -56,6 +56,7 @@ export default {
 		R: null,
 		last: null,
 		maxNoise: 75,
+		ms: 0,
 	}),
 	mounted() {
 		this.init();
@@ -256,6 +257,7 @@ export default {
 			// See ya in 1000/desiredFramerate milliseconds
 			this.lastCalledTime = performance.now();
 			let ms = performance.now() - start;
+			this.ms = ms
 			setTimeout(this.frame, 1000 / this.framerate - ms);
 		}
 	}
