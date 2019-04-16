@@ -13,13 +13,13 @@ npm install
 npm run serve
 ```
 
-Deploy to `avivace.github.io/kalman`:
+Publish on `avivace.github.io/kalman`:
 
 ```bash
 npm run deploy
 ```
 
-> Development is done on the `develop` branch due to GitHub's restriction on branches for user pages (the build is deployed on the `master` branch and deployed to `avivace.github.io/kalman` from there).
+> Development is done on the `develop` branch due to GitHub's restriction on branches for user pages (the build is deployed on the `master` branch and published to `avivace.github.io/kalman` from there).
 
 ### Stack
 
