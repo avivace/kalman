@@ -238,9 +238,9 @@ export default {
 
 				// Push the final state (real, noisy, filtered)
 				this.states.push(new this.State(a, n, k));
-
+				let i;
 				// Draw every state in the stack, and kill the older ones
-				for (i = this.states.length - 1; i >= 0; --i) {
+				for (i = this.states.length - 1; i > 0; --i) {
 					const state = this.states[i];
 					state.display();
 					state.update();
