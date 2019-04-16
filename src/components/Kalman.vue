@@ -239,20 +239,16 @@ export default {
 
 				// Push the final state (real, noisy, filtered)
 				this.states.push(new this.State(a, n, k));
-
+				let i;
 				// Draw every state in the stack, and kill the older ones
-				this.states.forEach(
-					function(state, i) {
-						state.display();
-						state.update();
-						if (state.dead) {
-							// FIXME
-							// This is probably bad, as splice keeps the references (citation needed)
-							// check this https://stackoverflow.com/questions/33162534/javascript-arguments-leak-var-array-slice-call
-							this.states.splice(i, 1);
-						}
-					}.bind(this)
-				);
+				for (i = this.states.length - 1; i > 0; --i) {
+					const state = this.states[i];
+					state.display();
+					state.update();
+					if (state.dead) {
+						this.states.splice(i, 1);
+					}
+				}
 			}
 			// See ya in 1000/desiredFramerate milliseconds
 			this.lastCalledTime = performance.now();
