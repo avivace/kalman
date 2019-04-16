@@ -27,7 +27,7 @@
 		<br /><br /><br />
 		
 		<span class="stats">
-			{{ status }}, <code>{{ states.length }}</code> states drawn. {{ ms }}
+			{{ status }}, <code>{{ states.length }}</code> states drawn. <code>{{ Math.round(ms) }}</code> ms per frame
 		</span>
 	<small >
 	<p><b><a href="https://github.com/avivace/kalman">Source code</a></b></p>
@@ -239,10 +239,10 @@ export default {
 
 				// Push the final state (real, noisy, filtered)
 				this.states.push(new this.State(a, n, k));
-				let i;
+
 				// Draw every state in the stack, and kill the older ones
-				for (i = this.states.length - 1; i > 0; --i) {
-					const state = this.states[i];
+				for (let i = this.states.length - 1; i > 0; --i) {
+					let state = this.states[i];
 					state.display();
 					state.update();
 					if (state.dead) {
