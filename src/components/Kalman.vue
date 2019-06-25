@@ -1,54 +1,79 @@
 <template>
 	<div>
 		<h2 class="title">Kalman Filter 2D demo</h2>
-		<h3 class="subtitle">Antonio Vivace, May 2019</h3>
+		<h3 class="subtitle">Antonio Vivace, June 2019</h3>
 
-		Width
-		<input
-			type="range"
-			min="0"
-			:max="1800"
-			value="75"
-			class="slider"
-			v-model="width"
-		/>
-		{{ width }}px Height
-		<input
-			type="range"
-			min="0"
-			:max="1000"
-			value="75"
-			class="slider"
-			v-model="height"
-		/>
-		{{ height }}px
+		<mu-row class="stats">
+			<mu-col style="padding: 15px" span="3"
+				><div class="grid-cell">
+					Mode:
+					<mu-select
+						@change="
+							drawPhase = 0;
+							realPoint = null;
+						"
+						v-model="mode"
+						>
+						<mu-option
+							v-for="(option, index) in options"
+							:key="option"
+							:label="option"
+							:value="index"
+						></mu-option>
+					</mu-select>
+					<br />
+					Width: {{ width }}px
+					<mu-slider
+						type="range"
+						:min="0"
+						:max="1800"
+						:step="1"
+						value="75"
+						class="slider"
+						v-model="width"
+					/>
+					Height: {{ height }}px
+					<mu-slider
+						type="range"
+						:min="0"
+						:max="1000"
+						:step="1"
+						value="75"
+						class="slider"
+						v-model="height"
+					/>
 
-		<mu-container>
-			Max Noise: {{ maxNoise }}
-			<mu-slider
-				:min="0"
-				:max="width / 3"
-				:step="1"
-				class="demo-slider"
-				v-model="maxNoise"
-			></mu-slider>
-		</mu-container>
+					Noise covariance: {{ sigma }}
+					<mu-slider
+						:min="0"
+						:max="width / 3"
+						:step="1"
+						class="demo-slider"
+						v-model="sigma"
+					></mu-slider>
+					<h4>Stats</h4>
+					{{ status }}, <code>{{ states.length }}</code> states drawn.
+					<code>{{ Math.round(ms) }}</code> ms per frame
+				</div></mu-col
+			>
+			<mu-col span="9"
+				><div class="grid-cell">
+					<canvas
+						class="kalmandemo"
+						@mouseleave="mouseLeave"
+						@pointermove="mouseOver"
+						ref="ccont"
+						:width="width"
+						:height="height"
+					></canvas></div
+			></mu-col>
+		</mu-row>
 
 		<br /><br />
-		<canvas
-			class="kalmandemo"
-			@mouseleave="mouseLeave"
-			@pointermove="mouseOver"
-			ref="ccont"
-			:width="width"
-			:height="height"
-		></canvas>
+
 		<br /><br /><br />
 
-		<span class="stats">
-			{{ status }}, <code>{{ states.length }}</code> states drawn.
-			<code>{{ Math.round(ms) }}</code> ms per frame
-		</span>
+		<span class="stats"> </span>
 		<small>
 			<p>
 				<b
