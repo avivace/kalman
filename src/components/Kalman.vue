@@ -187,7 +187,7 @@ export default {
 			return Math.floor(Math.random() * Math.floor(max));
 		},
 		mouseLeave() {
-			this.status = "paused";
+			//this.status = "paused";
 		},
 		mouseOver(event) {
 			this.status = "running";
@@ -223,17 +223,17 @@ export default {
 			]);
 
 			this.Q = m([
-				[0.001, 0, 0, 0],
-				[0, 0.001, 0, 0],
-				[0, 0, 0, 0],
-				[0, 0, 0, 0]
+				[0.01, 0, 0, 0],
+				[0, 0.01, 0, 0],
+				[0, 0, 0.01, 0],
+				[0, 0, 0, 0.01]
 			]);
 
 			this.R = m([
-				[0.1, 0, 0, 0],
-				[0, 0.1, 0, 0],
-				[0, 0, 0.1, 0],
-				[0, 0, 0, 0.1]
+				[this.sigma, 0, 0, 0],
+				[0, this.sigma, 0, 0],
+				[0, 0, this.sigma, 0],
+				[0, 0, 0, this.sigma]
 			]);
 
 			this.lastPoint = v([0, 0, 0, 0]);
@@ -287,7 +287,7 @@ export default {
 
 					let alpha = Math.round((this.ttl * 255) / 200).toString(16);
 					this.ctx.beginPath();
-					this.ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
+					this.ctx.arc(this.x, this.y, 1.75, 0, 2 * Math.PI);
 					this.ctx.fillStyle = color + alpha;
 					this.ctx.fill();
 					//this.ctx.fillRect(this.x, this.y, 4, 4);
@@ -441,7 +441,7 @@ export default {
 				);
 
 				// Push the final state (real, noisy, filtered)
-				this.states.push(new this.State(a, n, k));
+				this.states.push(new this.State(this.realPoint, n, k));
 
 				// Draw every state in the stack, and kill the older ones
 				for (let i = this.states.length - 1; i > 0; --i) {
@@ -464,6 +464,7 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 a {
 	text-decoration: none;
 }
@@ -473,15 +474,15 @@ a {
 
 .title {
 	font-weight: 700;
-	font-size: 4rem;
-	letter-spacing: -0.07em;
+	font-size: 3rem;
+	letter-spacing: -0.06em;
 	line-height: 0;
 }
 
 .subtitle {
 	font-weight: 500;
-	font-size: 1.7rem;
-	letter-spacing: -0.07em;
+	font-size: 1.6rem;
+	letter-spacing: -0.05em;
 	line-height: 0;
 }
 
