@@ -171,8 +171,12 @@ export default {
 		Q: null,
 		R: null,
 		last: null,
-		maxNoise: 75,
-		ms: 0
+		ms: 0,
+		mode: 1,
+		options: ["Mouse", "Square Path", "2d"],
+		realPoint: null,
+		drawPhase: 0,
+		sigma: 100
 	}),
 	mounted() {
 		this.init();
@@ -194,6 +198,8 @@ export default {
 			this.clientY = event.clientY - rect.top;
 		},
 		init() {
+			console.log(Math.randomGaussian(0, this.sigma));
+
 			// Sylvester is available under the window context, since we imported
 			//  it globally in the html template.
 			let m = window.$M;
@@ -301,16 +307,88 @@ export default {
 				this.ctx.fillStyle = "#263238";
 				this.ctx.fillRect(0, 0, this.width, this.height);
 
-				let maxNoise = this.maxNoise;
-
+				let step = 5;
 				// Real point
-				let a = new this.Point(this.clientX - 3, this.clientY - 3, ctx);
+				if (this.mode == 0) {
+					this.realPoint = new this.Point(
+						this.clientX - 3,
+						this.clientY - 3,
+						ctx
+					);
+				} else if (this.mode == 1) {
+					if (this.realPoint == null) {
+						this.realPoint = new this.Point(180, 180, ctx);
+					}
+
+					if (this.drawPhase == 0) {
+						this.realPoint = new this.Point(
+							this.realPoint.x + step,
+							this.realPoint.y,
+							ctx
+						);
+						if (this.realPoint.x == this.width - 180) {
+							this.drawPhase = 1;
+						}
+					} else if (this.drawPhase == 1) {
+						this.realPoint = new this.Point(
+							this.realPoint.x,
+							this.realPoint.y + step,
+							ctx
+						);
+						if (this.realPoint.y == this.height - 180) {
+							this.drawPhase = 2;
+						}
+					} else if (this.drawPhase == 2) {
+						this.realPoint = new this.Point(
+							this.realPoint.x - step,
+							this.realPoint.y,
+							ctx
+						);
+						if (this.realPoint.x == 180) {
+							this.drawPhase = 3;
+						}
+					} else if (this.drawPhase == 3) {
+						this.realPoint = new this.Point(
+							this.realPoint.x,
+							this.realPoint.y - step,
+							ctx
+						);
+						if (this.realPoint.y == 180) {
+							this.drawPhase = 0;
+						}
+					}
+				} else if (this.mode == 2) {
+					if (this.realPoint == null) {
+						this.realPoint = new this.Point(
+							0,
+							this.height / 2,
+							ctx
+						);
+						this.drawPhase = 0;
+					} else {
+						this.realPoint = new this.Point(
+							this.realPoint.x + 1,
+							this.realPoint.y,
+							ctx
+						);
+					}
+					if (this.realPoint.x == this.width) {
+						this.realPoint.x = 0;
+						this.states = null;
+					}
+				}
+
 				// Add noise to the clean input
-				let noisyX = Math.round(
-					this.clientX + this.getRandomInt(maxNoise) - maxNoise / 2
-				);
+				if (this.mode != 2) {
+					var noisyX = Math.round(
+						this.realPoint.x + Math.randomGaussian(0, this.sigma)
+					);
+				} else {
+					var noisyX = this.realPoint.x;
+				}
+
 				let noisyY = Math.round(
-					this.clientY + this.getRandomInt(maxNoise) - maxNoise / 2
+					this.realPoint.y + Math.randomGaussian(0, this.sigma)
 				);
 
 				let n = new this.Point(noisyX, noisyY, ctx);
