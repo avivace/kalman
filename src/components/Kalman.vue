@@ -6,14 +6,17 @@
 		<mu-row class="stats">
 			<mu-col style="padding: 15px" span="3"
 				><div class="grid-cell">
+					<mu-button @click="handleStartButton" :color="startBtnColor"
+						><mu-icon :value="startBtnIcon"></mu-icon
+						>{{ startBtnText }}</mu-button
+					>&nbsp;
+					<mu-button @click="init" color="red"
+						><mu-icon value="undo"></mu-icon> Reset</mu-button
+					>
+					<br /><br />
+
 					Mode:
-					<mu-select
-						@change="
-							drawPhase = 0;
-							realPoint = null;
-						"
-						v-model="mode"
-						>
+					<mu-select @change="init" v-model="mode">
 						<mu-option
 							v-for="(option, index) in options"
 							:key="option"
@@ -176,13 +179,27 @@ export default {
 		options: ["Mouse", "Square Path", "2d"],
 		realPoint: null,
 		drawPhase: 0,
-		sigma: 100
+		sigma: 100,
+		startBtnText: "Start",
+		startBtnIcon: "play_arrow",
+		startBtnColor: "blue"
 	}),
 	mounted() {
 		this.init();
 		this.frame();
 	},
 	methods: {
+		handleStartButton() {
+			if (this.status == "paused") {
+				this.status = "running";
+				this.startBtnText = "Pause";
+				this.startBtnIcon = "pause";
+			} else {
+				this.status = "paused";
+				this.startBtnText = "Start";
+				this.startBtnIcon = "play_arrow";
+			}
+		},
 		getRandomInt(max) {
 			return Math.floor(Math.random() * Math.floor(max));
 		},
@@ -190,7 +207,6 @@ export default {
 			//this.status = "paused";
 		},
 		mouseOver(event) {
-			this.status = "running";
 			let canvas = this.$refs.ccont;
 			var rect = canvas.getBoundingClientRect();
 
@@ -198,7 +214,10 @@ export default {
 			this.clientY = event.clientY - rect.top;
 		},
 		init() {
-			console.log(Math.randomGaussian(0, this.sigma));
+			this.drawPhase = 0;
+			this.states = [];
+			this.realPoint = null;
+
 
 			// Sylvester is available under the window context, since we imported
 			//  it globally in the html template.
@@ -258,6 +277,16 @@ export default {
 					this.dead = false;
 				}
 
+				get() {
+					return [
+						this.noisyInput.x,
+						this.noisyInput.y,
+						this.noisyInput.ttl
+					];
+				}
+				getK() {
+					return [this.kalmanPoint.x, this.kalmanPoint.y];
+				}
 				display() {
 					this.realInput.display("#0d47a1");
 					this.kalmanPoint.display("#dd2c00");
@@ -287,9 +316,10 @@ export default {
 
 					let alpha = Math.round((this.ttl * 255) / 200).toString(16);
 					this.ctx.beginPath();
-					this.ctx.arc(this.x, this.y, 1.75, 0, 2 * Math.PI);
+					this.ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
 					this.ctx.fillStyle = color + alpha;
 					this.ctx.fill();
+
 					//this.ctx.fillRect(this.x, this.y, 4, 4);
 				}
 
@@ -304,10 +334,10 @@ export default {
 				let v = window.$V;
 
 				let ctx = this.ctx;
-				this.ctx.fillStyle = "#263238";
+				this.ctx.fillStyle = "#1f1f31";
 				this.ctx.fillRect(0, 0, this.width, this.height);
 
-				let step = 5;
+				let step = 4;
 				// Real point
 				if (this.mode == 0) {
 					this.realPoint = new this.Point(
@@ -367,16 +397,24 @@ export default {
 						this.drawPhase = 0;
 					} else {
 						this.realPoint = new this.Point(
-							this.realPoint.x + 1,
+							this.realPoint.x + 5,
 							this.realPoint.y,
 							ctx
 						);
-					}
-					if (this.realPoint.x == this.width) {
-						this.realPoint.x = 0;
-						this.states = null;
+						if (this.realPoint.x == this.width) {
+							this.realPoint.x = 0;
+							this.states = [];
+							this.lastPoint = v([
+								this.realPoint.x,
+								this.realPoint.y,
+								0,
+								0
+							]);
+						}
 					}
 				}
+
+
 
 				// Add noise to the clean input
 				if (this.mode != 2) {
@@ -448,6 +486,28 @@ export default {
 					let state = this.states[i];
 					state.display();
 					state.update();
+					if (i > 1) {
+						var p1 = state.get();
+						var p2 = this.states[i - 1].get();
+						let alpha = Math.round((p1[2] * 255) / 200).toString(
+							16
+						);
+						ctx.strokeStyle = "#229922" + alpha;
+						ctx.lineWidth = 1;
+						ctx.beginPath();
+						ctx.moveTo(p1[0], p1[1]);
+						ctx.lineTo(p2[0], p2[1]);
+						ctx.stroke();
+						var p1 = state.getK();
+						var p2 = this.states[i - 1].getK();
+						ctx.strokeStyle = "#992200" + alpha;
+						ctx.lineWidth = 1;
+						ctx.beginPath();
+						ctx.moveTo(p1[0], p1[1]);
+						ctx.lineTo(p2[0], p2[1]);
+						ctx.stroke();
+					}
+
 					if (state.dead) {
 						this.states.splice(i, 1);
 					}
@@ -464,7 +524,6 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 a {
 	text-decoration: none;
 }
