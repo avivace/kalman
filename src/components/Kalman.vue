@@ -54,8 +54,37 @@
 						class="demo-slider"
 						v-model="sigma"
 					></mu-slider>
+					<mu-checkbox
+						v-model="traj"
+						label="Trajectory"
+					></mu-checkbox>
+					<mu-checkbox
+						v-model="drawReal"
+						label="Real Input"
+					></mu-checkbox>
+					<mu-checkbox
+						v-model="drawNoisy"
+						label="Noisy"
+					></mu-checkbox>
+					<mu-checkbox
+						v-model="drawNoisyTraj"
+						label="Noisy Traj"
+					></mu-checkbox>
+					<mu-checkbox
+						v-model="drawFiltered"
+						label="Filtered"
+					></mu-checkbox>
+					<mu-checkbox
+						v-model="drawFilteredTraj"
+						label="Filtered Traj"
+					></mu-checkbox>
+					<mu-checkbox
+						v-model="drawPrediction"
+						label="Prediction"
+					></mu-checkbox>
 					<h4>Stats</h4>
-					{{ status }}, <code>{{ states.length }}</code> states drawn.
+					{{ status }}<br />
+					<code>{{ states.length }}</code> states drawn.<br />
 					<code>{{ Math.round(ms) }}</code> ms per frame
 				</div></mu-col
 			>
@@ -176,13 +205,20 @@ export default {
 		last: null,
 		ms: 0,
 		mode: 1,
-		options: ["Mouse", "Square Path", "2d"],
+		options: ["Mouse", "Square Path", "1D"],
 		realPoint: null,
 		drawPhase: 0,
 		sigma: 100,
 		startBtnText: "Start",
 		startBtnIcon: "play_arrow",
-		startBtnColor: "blue"
+		startBtnColor: "blue",
+		traj: false,
+		drawReal: false,
+		drawNoisy: false,
+		drawNoisyTraj: false,
+		drawFiltered: false,
+		drawFilteredTraj: false,
+		drawPrediction: false
 	}),
 	mounted() {
 		this.init();
@@ -287,11 +323,17 @@ export default {
 				getK() {
 					return [this.kalmanPoint.x, this.kalmanPoint.y];
 				}
-				display() {
+				displayReal() {
 					this.realInput.display("#0d47a1");
+				}
+				displayFiltered() {
 					this.kalmanPoint.display("#dd2c00");
-					this.noisyInput.ttl;
+				}
+				displayNoisy() {
 					this.noisyInput.display("#388e3c");
+				}
+				displayPrediction() {
+					//
 				}
 
 				update() {
@@ -484,28 +526,44 @@ export default {
 				// Draw every state in the stack, and kill the older ones
 				for (let i = this.states.length - 1; i > 0; --i) {
 					let state = this.states[i];
-					state.display();
+					//state.display();
+					if (this.drawReal) {
+						state.displayReal();
+					}
+					if (this.drawFiltered) {
+						state.displayFiltered();
+					}
+					if (this.drawNoisy) {
+						state.displayNoisy();
+					}
+
 					state.update();
+
 					if (i > 1) {
 						var p1 = state.get();
-						var p2 = this.states[i - 1].get();
 						let alpha = Math.round((p1[2] * 255) / 200).toString(
 							16
 						);
-						ctx.strokeStyle = "#229922" + alpha;
-						ctx.lineWidth = 1;
-						ctx.beginPath();
-						ctx.moveTo(p1[0], p1[1]);
-						ctx.lineTo(p2[0], p2[1]);
-						ctx.stroke();
-						var p1 = state.getK();
-						var p2 = this.states[i - 1].getK();
-						ctx.strokeStyle = "#992200" + alpha;
-						ctx.lineWidth = 1;
-						ctx.beginPath();
-						ctx.moveTo(p1[0], p1[1]);
-						ctx.lineTo(p2[0], p2[1]);
-						ctx.stroke();
+						if (this.drawNoisyTraj) {
+							var p2 = this.states[i - 1].get();
+							ctx.strokeStyle = "#229922" + alpha;
+							ctx.lineWidth = 1;
+							ctx.beginPath();
+							ctx.moveTo(p1[0], p1[1]);
+							ctx.lineTo(p2[0], p2[1]);
+							ctx.stroke();
+						}
+
+						if (this.drawFilteredTraj) {
+							var p1 = state.getK();
+							var p2 = this.states[i - 1].getK();
+							ctx.strokeStyle = "#992200" + alpha;
+							ctx.lineWidth = 2;
+							ctx.beginPath();
+							ctx.moveTo(p1[0], p1[1]);
+							ctx.lineTo(p2[0], p2[1]);
+							ctx.stroke();
+						}
 					}
 
 					if (state.dead) {
