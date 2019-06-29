@@ -106,11 +106,18 @@
 		<br /><br /><br />
 
 		<span class="stats"> </span>
-		<small>
+		<small style="font-size:1rem">
 			<p>
 				<b
-					><a href="https://github.com/avivace/kalman"
-						>Source code</a
+					><a
+						style="color:#2c3e50"
+						href="https://github.com/avivace/kalman"
+					>
+						<img
+							style="vertical-align: text-bottom;"
+							height="24px"
+							src="https://akveo.github.io/eva-icons/outline/svg/github-outline.svg"
+						/>&nbsp;Source Code</a
 					></b
 				>
 			</p>
@@ -195,7 +202,7 @@ export default {
 		framecount: 0,
 		status: "paused",
 		states: [],
-		framerate: 60,
+		framerate: 160,
 		lastPoint: null,
 		A: null,
 		B: null,
@@ -253,7 +260,6 @@ export default {
 			this.drawPhase = 0;
 			this.states = [];
 			this.realPoint = null;
-
 
 			// Sylvester is available under the window context, since we imported
 			//  it globally in the html template.
@@ -455,8 +461,6 @@ export default {
 						}
 					}
 				}
-
-
 
 				// Add noise to the clean input
 				if (this.mode != 2) {
