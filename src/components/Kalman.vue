@@ -45,8 +45,9 @@
 						class="slider"
 						v-model="ttl"
 					/>
-					Width: {{ width }}px<br>
-					<mu-slider v-if="showCanvasControls"
+					Width: {{ width }}px<br />
+					<mu-slider
+						v-if="showCanvasControls"
 						type="range"
 						:min="0"
 						:max="1800"
@@ -54,18 +55,17 @@
 						value="75"
 						class="slider"
 						v-model="widthC"
-						@change="mounted"
 					/>
-					Height: {{ height }}px<br>
-					<mu-slider v-if="showCanvasControls"
+					Height: {{ height }}px<br />
+					<mu-slider
+						v-if="showCanvasControls"
 						type="range"
 						:min="0"
 						:max="1000"
 						:step="1"
 						value="75"
 						class="slider"
-						v-model="heightC"
-						@change="mounted"
+						v-model="height"
 					/>
 
 					Noise covariance: {{ sigma }}
@@ -224,8 +224,10 @@
 export default {
 	data: () => ({
 		// Canvas size
-		width: 200,
-		height: 200,
+		width: 350,
+		height: 350,
+		heightC: 700,
+		widthC: 700,
 		ctx: null,
 		// Performance
 		lastCalledTime: null,
@@ -265,28 +267,17 @@ export default {
 		oldmov: null,
 		oldoldmov: null,
 		cscale: 1,
-		heightC: 400,
-		widthC: 400,
-		showCanvasControls: true
+		showCanvasControls: false
 	}),
 	mounted() {
 		var c = this.$refs.ccont;
 		this.ctx = c.getContext("2d", { alpha: false });
 		this.ctx.scale(2, 2);
-
-		this.init();
-		this.frame();
 	},
 	methods: {
-			mounted() {
-		var c = this.$refs.ccont;
-		this.ctx = c.getContext("2d", { alpha: false });
-		this.ctx.scale(2, 2);
-
-		this.init();
-		this.frame();
-	},
 		handleStartButton() {
+			this.init();
+			this.frame();
 			this.showCanvasControls = false;
 			if (this.status == "paused") {
 				this.status = "running";
@@ -456,8 +447,8 @@ export default {
 				// Real point
 				if (this.mode == 0) {
 					this.realPoint = new this.Point(
-						(this.clientX) / 2,
-						(this.clientY) / 2,
+						this.clientX / 2,
+						this.clientY / 2,
 						ctx
 					);
 				} else if (this.mode == 1) {
