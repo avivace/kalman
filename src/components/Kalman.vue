@@ -35,6 +35,16 @@
 						class="slider"
 						v-model="framerate"
 					/>
+					TTL: {{ ttl }}
+					<mu-slider
+						type="range"
+						:min="0"
+						:max="200"
+						:step="1"
+						value="50"
+						class="slider"
+						v-model="ttl"
+					/>
 					Width: {{ width }}px
 					<mu-slider
 						type="range"
