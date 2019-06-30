@@ -3,8 +3,8 @@
 		<h2 class="title">Kalman Filter 2D demo</h2>
 		<h3 class="subtitle">Antonio Vivace, June 2019</h3>
 
-		<mu-row class="stats">
-			<mu-col style="padding: 15px" sm="12" md="12" lg="3" span="3"
+		<mu-row gutter class="stats">
+			<mu-col style="padding: 15px" sm="12" md="12" lg="3" span="12"
 				><div class="grid-cell">
 					<mu-button @click="handleStartButton" :color="startBtnColor"
 						><mu-icon :value="startBtnIcon"></mu-icon
@@ -45,25 +45,27 @@
 						class="slider"
 						v-model="ttl"
 					/>
-					Width: {{ width }}px
-					<mu-slider
+					Width: {{ width }}px<br>
+					<mu-slider v-if="showCanvasControls"
 						type="range"
 						:min="0"
 						:max="1800"
 						:step="1"
 						value="75"
 						class="slider"
-						v-model="width"
+						v-model="widthC"
+						@change="mounted"
 					/>
-					Height: {{ height }}px
-					<mu-slider
+					Height: {{ height }}px<br>
+					<mu-slider v-if="showCanvasControls"
 						type="range"
 						:min="0"
 						:max="1000"
 						:step="1"
 						value="75"
 						class="slider"
-						v-model="height"
+						v-model="heightC"
+						@change="mounted"
 					/>
 
 					Noise covariance: {{ sigma }}
@@ -117,7 +119,7 @@
 					<code>{{ Math.round(ms) }}</code> ms per frame
 				</div></mu-col
 			>
-			<mu-col sm="12" md="12" lg="9" span="9"
+			<mu-col sm="12" md="12" lg="9" span="12"
 				><div class="grid-cell">
 					<canvas
 						class="kalmandemo"
@@ -222,8 +224,8 @@
 export default {
 	data: () => ({
 		// Canvas size
-		width: 400,
-		height: 400,
+		width: 200,
+		height: 200,
 		ctx: null,
 		// Performance
 		lastCalledTime: null,
@@ -263,8 +265,9 @@ export default {
 		oldmov: null,
 		oldoldmov: null,
 		cscale: 1,
-		heightC: 800,
-		widthC: 800
+		heightC: 400,
+		widthC: 400,
+		showCanvasControls: true
 	}),
 	mounted() {
 		var c = this.$refs.ccont;
@@ -275,7 +278,16 @@ export default {
 		this.frame();
 	},
 	methods: {
+			mounted() {
+		var c = this.$refs.ccont;
+		this.ctx = c.getContext("2d", { alpha: false });
+		this.ctx.scale(2, 2);
+
+		this.init();
+		this.frame();
+	},
 		handleStartButton() {
+			this.showCanvasControls = false;
 			if (this.status == "paused") {
 				this.status = "running";
 				this.startBtnText = "Pause";
@@ -715,14 +727,14 @@ a {
 	font-weight: 700;
 	font-size: 3rem;
 	letter-spacing: -0.06em;
-	line-height: 0;
+	line-height: 0.8;
 }
 
 .subtitle {
 	font-weight: 500;
 	font-size: 1.6rem;
 	letter-spacing: -0.05em;
-	line-height: 0;
+	line-height: 1;
 }
 
 .kalmandemo {
