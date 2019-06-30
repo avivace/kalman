@@ -4,7 +4,7 @@
 		<h3 class="subtitle">Antonio Vivace, June 2019</h3>
 
 		<mu-row class="stats">
-			<mu-col style="padding: 15px" span="3"
+			<mu-col style="padding: 15px" sm="12" md="12" lg="3" span="3"
 				><div class="grid-cell">
 					<mu-button @click="handleStartButton" :color="startBtnColor"
 						><mu-icon :value="startBtnIcon"></mu-icon
