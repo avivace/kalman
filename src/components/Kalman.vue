@@ -74,7 +74,7 @@
 						class="demo-slider"
 						v-model="sigma"
 					></mu-slider>
-										Prediction Steps : {{predSteps}}
+					Prediction Steps : {{ predSteps }}
 					<mu-slider
 						:min="1"
 						:max="50"
@@ -124,8 +124,8 @@
 						@mouseleave="mouseLeave"
 						@pointermove="mouseOver"
 						ref="ccont"
-						:width="width"
-						:height="height"
+						:width="widthC"
+						:height="heightC"
 					></canvas></div
 			></mu-col>
 		</mu-row>
@@ -222,8 +222,8 @@
 export default {
 	data: () => ({
 		// Canvas size
-		width: 800,
-		height: 800,
+		width: 400,
+		height: 400,
 		ctx: null,
 		// Performance
 		lastCalledTime: null,
@@ -243,10 +243,10 @@ export default {
 		last: null,
 		ms: 0,
 		mode: 1,
-		options: ["Mouse", "Square Path", "1D"],
+		options: ["Mouse", "Square Path", "1D", "Random Path"],
 		realPoint: null,
 		drawPhase: 0,
-		sigma: 100,
+		sigma: 50,
 		startBtnText: "Start",
 		startBtnIcon: "play_arrow",
 		startBtnColor: "blue",
@@ -258,10 +258,19 @@ export default {
 		drawFilteredTraj: true,
 		drawPrediction: false,
 		prediction: false,
-		predSteps: 15,
-		ttl: 150
+		predSteps: 7,
+		ttl: 50,
+		oldmov: null,
+		oldoldmov: null,
+		cscale: 1,
+		heightC: 800,
+		widthC: 800
 	}),
 	mounted() {
+		var c = this.$refs.ccont;
+		this.ctx = c.getContext("2d", { alpha: false });
+		this.ctx.scale(2, 2);
+
 		this.init();
 		this.frame();
 	},
@@ -348,8 +357,8 @@ export default {
 				[0, 0, 0, 0]
 			]);
 
-			var c = this.$refs.ccont;
-			this.ctx = c.getContext("2d", { alpha: false });
+			this.height = this.heightC / 2;
+			this.width = this.widthC / 2;
 			this.ctx.fillStyle = "#37474f";
 			this.ctx.fillRect(0, 0, this.width, this.height);
 
@@ -392,7 +401,7 @@ export default {
 				}
 			};
 
-			var self = this
+			var self = this;
 			this.Point = class Point {
 				constructor(x, y, ctx) {
 					this.x = x;
@@ -405,9 +414,11 @@ export default {
 					// Map remaining TTL to 0-255, convert it to two hex digits
 					//  and use it as Alpha channel (ttl -> 0, alpha -> 1)
 
-					let alpha = Math.round((this.ttl * 255) / self.ttl).toString(16);
+					let alpha = Math.round(
+						(this.ttl * 255) / self.ttl
+					).toString(16);
 					this.ctx.beginPath();
-					this.ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
+					this.ctx.arc(this.x, this.y, 1.5, 0, 2 * Math.PI);
 					this.ctx.fillStyle = color + alpha;
 
 					this.ctx.fill();
@@ -433,8 +444,8 @@ export default {
 				// Real point
 				if (this.mode == 0) {
 					this.realPoint = new this.Point(
-						this.clientX - 3,
-						this.clientY - 3,
+						(this.clientX) / 2,
+						(this.clientY) / 2,
 						ctx
 					);
 				} else if (this.mode == 1) {
@@ -448,7 +459,10 @@ export default {
 							this.realPoint.y,
 							ctx
 						);
-						if (this.realPoint.x > this.width - Math.round(this.width/5)) {
+						if (
+							this.realPoint.x >
+							this.width - Math.round(this.width / 5)
+						) {
 							this.drawPhase = 1;
 						}
 					} else if (this.drawPhase == 1) {
@@ -457,7 +471,10 @@ export default {
 							this.realPoint.y + step,
 							ctx
 						);
-						if (this.realPoint.y > this.height - Math.round(this.height/5)) {
+						if (
+							this.realPoint.y >
+							this.height - Math.round(this.height / 5)
+						) {
 							this.drawPhase = 2;
 						}
 					} else if (this.drawPhase == 2) {
@@ -466,7 +483,7 @@ export default {
 							this.realPoint.y,
 							ctx
 						);
-						if (this.realPoint.x < Math.round(this.width/5)) {
+						if (this.realPoint.x < Math.round(this.width / 5)) {
 							this.drawPhase = 3;
 						}
 					} else if (this.drawPhase == 3) {
@@ -475,7 +492,7 @@ export default {
 							this.realPoint.y - step,
 							ctx
 						);
-						if (this.realPoint.y < Math.round(this.height/5)) {
+						if (this.realPoint.y < Math.round(this.height / 5)) {
 							this.drawPhase = 0;
 						}
 					}
@@ -504,6 +521,40 @@ export default {
 							]);
 						}
 					}
+				} else if (this.mode == 3) {
+					if (this.realPoint == null) {
+						this.realPoint = new this.Point(
+							this.width / 2,
+							this.height / 2,
+							ctx
+						);
+					}
+					let step = 10;
+					do {
+						var mov = Math.floor(Math.random() * 4);
+						if (mov == 1) {
+							var newX = this.realPoint.x + step;
+							var newY = this.realPoint.y;
+						} else if (mov == 2) {
+							var newX = this.realPoint.x - step;
+							var newY = this.realPoint.y;
+						} else if (mov == 3) {
+							var newX = this.realPoint.x;
+							var newY = this.realPoint.y + step;
+						} else {
+							var newX = this.realPoint.x;
+							var newY = this.realPoint.y - step;
+						}
+					} while (
+						newX >= this.width ||
+						newX <= 0 ||
+						newY >= this.height ||
+						newY <= 0 ||
+						this.oldmov == mov
+					);
+					this.oldmov = mov;
+
+					this.realPoint = new this.Point(newX, newY, ctx);
 				}
 
 				// Add noise to the clean input
@@ -606,9 +657,9 @@ export default {
 
 					if (i > 1) {
 						var p1 = state.get();
-						let alpha = Math.round((p1[2] * 255) / this.ttl).toString(
-							16
-						);
+						let alpha = Math.round(
+							(p1[2] * 255) / this.ttl
+						).toString(16);
 						if (this.drawNoisyTraj) {
 							var p2 = this.states[i - 1].get();
 							ctx.strokeStyle = "#229922" + alpha;
@@ -638,7 +689,6 @@ export default {
 				if (this.prediction) {
 					for (var i = 0; i < pPoints.length; i++) {
 						pPoints[i].display("#ffffff");
-
 					}
 				}
 			}
