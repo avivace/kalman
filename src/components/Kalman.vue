@@ -25,6 +25,16 @@
 						></mu-option>
 					</mu-select>
 					<br />
+					Frame Rate: {{ framerate }} FPS
+					<mu-slider
+						type="range"
+						:min="0"
+						:max="80"
+						:step="1"
+						value="50"
+						class="slider"
+						v-model="framerate"
+					/>
 					Width: {{ width }}px
 					<mu-slider
 						type="range"
@@ -85,7 +95,7 @@
 					></mu-checkbox>
 					<mu-checkbox
 						v-model="drawFilteredTraj"
-						label="Filtered Traj"
+						label="Filtered Path"
 					></mu-checkbox>
 					<mu-checkbox
 						v-model="prediction"
@@ -97,7 +107,7 @@
 					<code>{{ Math.round(ms) }}</code> ms per frame
 				</div></mu-col
 			>
-			<mu-col span="9"
+			<mu-col sm="12" md="12" lg="9" span="9"
 				><div class="grid-cell">
 					<canvas
 						class="kalmandemo"
@@ -239,6 +249,7 @@ export default {
 		drawPrediction: false,
 		prediction: false,
 		predSteps: 15,
+		ttl: 150
 	}),
 	mounted() {
 		this.init();
@@ -371,11 +382,12 @@ export default {
 				}
 			};
 
+			var self = this
 			this.Point = class Point {
 				constructor(x, y, ctx) {
 					this.x = x;
 					this.y = y;
-					this.ttl = 200;
+					this.ttl = self.ttl;
 					this.ctx = ctx;
 				}
 
@@ -383,7 +395,7 @@ export default {
 					// Map remaining TTL to 0-255, convert it to two hex digits
 					//  and use it as Alpha channel (ttl -> 0, alpha -> 1)
 
-					let alpha = Math.round((this.ttl * 255) / 200).toString(16);
+					let alpha = Math.round((this.ttl * 255) / self.ttl).toString(16);
 					this.ctx.beginPath();
 					this.ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
 					this.ctx.fillStyle = color + alpha;
@@ -426,7 +438,7 @@ export default {
 							this.realPoint.y,
 							ctx
 						);
-						if (this.realPoint.x == this.width - 180) {
+						if (this.realPoint.x > this.width - Math.round(this.width/5)) {
 							this.drawPhase = 1;
 						}
 					} else if (this.drawPhase == 1) {
@@ -435,7 +447,7 @@ export default {
 							this.realPoint.y + step,
 							ctx
 						);
-						if (this.realPoint.y == this.height - 180) {
+						if (this.realPoint.y > this.height - Math.round(this.height/5)) {
 							this.drawPhase = 2;
 						}
 					} else if (this.drawPhase == 2) {
@@ -444,7 +456,7 @@ export default {
 							this.realPoint.y,
 							ctx
 						);
-						if (this.realPoint.x == 180) {
+						if (this.realPoint.x < Math.round(this.width/5)) {
 							this.drawPhase = 3;
 						}
 					} else if (this.drawPhase == 3) {
@@ -453,7 +465,7 @@ export default {
 							this.realPoint.y - step,
 							ctx
 						);
-						if (this.realPoint.y == 180) {
+						if (this.realPoint.y < Math.round(this.height/5)) {
 							this.drawPhase = 0;
 						}
 					}
@@ -584,7 +596,7 @@ export default {
 
 					if (i > 1) {
 						var p1 = state.get();
-						let alpha = Math.round((p1[2] * 255) / 200).toString(
+						let alpha = Math.round((p1[2] * 255) / this.ttl).toString(
 							16
 						);
 						if (this.drawNoisyTraj) {
