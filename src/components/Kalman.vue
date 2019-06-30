@@ -54,13 +54,22 @@
 						class="demo-slider"
 						v-model="sigma"
 					></mu-slider>
+										Prediction Steps : {{predSteps}}
+					<mu-slider
+						:min="1"
+						:max="50"
+						:step="1"
+						class="demo-slider"
+						v-model="predSteps"
+					></mu-slider>
+					<!--
 					<mu-checkbox
 						v-model="traj"
 						label="Trajectory"
-					></mu-checkbox>
+					></mu-checkbox>-->
 					<mu-checkbox
 						v-model="drawReal"
-						label="Real Input"
+						label="Real Path"
 					></mu-checkbox>
 					<mu-checkbox
 						v-model="drawNoisy"
@@ -68,7 +77,7 @@
 					></mu-checkbox>
 					<mu-checkbox
 						v-model="drawNoisyTraj"
-						label="Noisy Traj"
+						label="Noisy Path"
 					></mu-checkbox>
 					<mu-checkbox
 						v-model="drawFiltered"
@@ -79,7 +88,7 @@
 						label="Filtered Traj"
 					></mu-checkbox>
 					<mu-checkbox
-						v-model="drawPrediction"
+						v-model="prediction"
 						label="Prediction"
 					></mu-checkbox>
 					<h4>Stats</h4>
@@ -202,13 +211,15 @@ export default {
 		framecount: 0,
 		status: "paused",
 		states: [],
-		framerate: 160,
+		framerate: 60,
 		lastPoint: null,
 		A: null,
 		B: null,
 		H: null,
 		Q: null,
 		R: null,
+		B: null,
+		c: null,
 		last: null,
 		ms: 0,
 		mode: 1,
@@ -221,11 +232,13 @@ export default {
 		startBtnColor: "blue",
 		traj: false,
 		drawReal: false,
-		drawNoisy: false,
+		drawNoisy: true,
 		drawNoisyTraj: false,
-		drawFiltered: false,
-		drawFilteredTraj: false,
-		drawPrediction: false
+		drawFiltered: true,
+		drawFilteredTraj: true,
+		drawPrediction: false,
+		prediction: false,
+		predSteps: 15,
 	}),
 	mounted() {
 		this.init();
@@ -266,6 +279,8 @@ export default {
 			let m = window.$M;
 			let v = window.$V;
 
+			this.c = v([0, 0, 0, 0]);
+
 			// State Transition
 			this.A = m([
 				[1, 0, 0.2, 0],
@@ -275,19 +290,25 @@ export default {
 			]);
 
 			// Input Control Matrix is ignored
-
-			this.H = m([
+			this.B = m([
 				[1, 0, 0, 0],
 				[0, 1, 0, 0],
 				[0, 0, 1, 0],
 				[0, 0, 0, 1]
 			]);
 
+			this.H = m([
+				[1, 0, 1, 0],
+				[0, 1, 0, 1],
+				[0, 0, 0, 0],
+				[0, 0, 0, 0]
+			]);
+
 			this.Q = m([
-				[0.01, 0, 0, 0],
-				[0, 0.01, 0, 0],
-				[0, 0, 0.01, 0],
-				[0, 0, 0, 0.01]
+				[0, 0, 0, 0],
+				[0, 0, 0, 0],
+				[0, 0, 0.1, 0],
+				[0, 0, 0, 0.1]
 			]);
 
 			this.R = m([
@@ -366,6 +387,7 @@ export default {
 					this.ctx.beginPath();
 					this.ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
 					this.ctx.fillStyle = color + alpha;
+
 					this.ctx.fill();
 
 					//this.ctx.fillRect(this.x, this.y, 4, 4);
@@ -492,7 +514,9 @@ export default {
 
 				// PREDICTION step
 				// x = (A * x) + (B * c)
-				var x = this.A.multiply(this.lastPoint);
+				var x = this.A.multiply(this.lastPoint).add(
+					this.B.multiply(this.c)
+				);
 				// P = (A * P * AT) + Q
 				var P = this.A.multiply(this.last)
 					.multiply(this.A.transpose())
@@ -524,6 +548,20 @@ export default {
 					ctx
 				);
 
+				if (this.prediction) {
+					var predX = this.lastPoint;
+					var count = this.predSteps;
+					var pPoints = Array();
+					for (var i = 0; i < count; i++) {
+						predX = this.A.multiply(predX).add(
+							this.B.multiply(this.c)
+						);
+						let x = predX.elements[0];
+						let y = predX.elements[1];
+						pPoints.push(new this.Point(x, y, ctx));
+						//var P = ((A.multiply(last_P)).multiply(A.transpose())).add(Q);
+					}
+				}
 				// Push the final state (real, noisy, filtered)
 				this.states.push(new this.State(this.realPoint, n, k));
 
@@ -534,11 +572,12 @@ export default {
 					if (this.drawReal) {
 						state.displayReal();
 					}
-					if (this.drawFiltered) {
-						state.displayFiltered();
-					}
+
 					if (this.drawNoisy) {
 						state.displayNoisy();
+					}
+					if (this.drawFiltered) {
+						state.displayFiltered();
 					}
 
 					state.update();
@@ -574,7 +613,14 @@ export default {
 						this.states.splice(i, 1);
 					}
 				}
+				if (this.prediction) {
+					for (var i = 0; i < pPoints.length; i++) {
+						pPoints[i].display("#ffffff");
+
+					}
+				}
 			}
+
 			// See ya in 1000/desiredFramerate milliseconds
 			this.lastCalledTime = performance.now();
 			let ms = performance.now() - start;
