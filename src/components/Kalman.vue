@@ -330,6 +330,7 @@ export default {
 				[0, 0, 0, 1]
 			]);
 
+
 			this.H = m([
 				[1, 0, 1, 0],
 				[0, 1, 0, 1],
@@ -337,6 +338,7 @@ export default {
 				[0, 0, 0, 0]
 			]);
 
+			// Process Noise
 			this.Q = m([
 				[0, 0, 0, 0],
 				[0, 0, 0, 0],
@@ -344,6 +346,7 @@ export default {
 				[0, 0, 0, 0.1]
 			]);
 
+			// Measurement Noise
 			this.R = m([
 				[this.sigma, 0, 0, 0],
 				[0, this.sigma, 0, 0],
