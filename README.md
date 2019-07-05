@@ -79,3 +79,7 @@ npm run deploy
 Noise Covariance Q of the Kalman Filter in Estimation.** - Yashpal Singh, Rajesh Mehra
 - **Stochastic Filtering** - Rui Castro
 - Apollo Guidance System software:[Virtual AGC — AGS — LVDC — Gemini](http://www.ibiblio.org/apollo/)
+
+### Acknowledgements
+
+[Manuele Rota](https://github.com/dubvulture) for cleaning up some of my trash code and improving the animation logic
