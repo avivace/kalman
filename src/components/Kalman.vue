@@ -1,174 +1,83 @@
 <template>
 	<div>
 		<h1 class="title">Kalman Filter 2D demo</h1>
-		<h3 class="subtitle">Antonio Vivace, June 2019</h3><mu-row gutter class="stats">
-			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"
-				></mu-col>
-			<mu-col style="font-size:16px;" sm="12" md="10" lg="8" span="12"
-				><center>
-Green points are artifically generated applying noise to the real input path according to the set covariance. This dirty path is then fed into the Kalman algorithm, which proceeds to clean it up. Finally, the filtered path is shown in red. Check <a href="https://courses.engr.illinois.edu/ece420/sp2017/UnderstandingKalmanFilter.pdf">here</a> for a detailed explanation of the intuition behind the this. <br><br>Select "Mouse" as mode and then hover your mouse on the canvas to draw path yourself.</center></mu-col><mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"
-				></mu-col></mu-row><br>
-<br>
+		<h3 class="subtitle">Antonio Vivace, June 2019</h3>
 		<mu-row gutter class="stats">
-			<mu-col style="padding-left:5%;padding-right:2.5%; padding: 15px" sm="12" md="12" lg="4" span="12"
-				><div class="grid-cell">
-					<mu-button @click="handleStartButton" :color="startBtnColor"
-						><mu-icon :value="startBtnIcon"></mu-icon
-						>{{ startBtnText }}</mu-button
-					>&nbsp;
-					<mu-button @click="init" color="red"
-						><mu-icon value="undo"></mu-icon> Reset</mu-button
-					>
+			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"></mu-col>
+			<mu-col style="font-size:18px;" sm="12" md="10" lg="8" span="12">
+				<center>
+					Green points are artifically generated applying noise to the real input path according to the set covariance. This dirty path is then fed into the Kalman algorithm, which proceeds to clean it up. Finally, the filtered path is shown in red. Check <a href="https://courses.engr.illinois.edu/ece420/sp2017/UnderstandingKalmanFilter.pdf">here</a> for an intuitive explanation of the math behind this. <br><br>Select "Mouse" as mode and then hover your mouse on the canvas to draw path yourself.</center>
+			</mu-col>
+			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"></mu-col>
+		</mu-row><br>
+		<br>
+		<mu-row gutter class="stats">
+			<mu-col style="padding-left:5%;padding-right:2.5%; padding: 15px" sm="12" md="12" lg="4" span="12">
+				<div class="grid-cell">
+					<mu-button @click="handleStartButton" :color="startBtnColor">
+						<mu-icon :value="startBtnIcon"></mu-icon>{{ startBtnText }}
+					</mu-button>&nbsp;
+					<mu-button @click="init" color="red">
+						<mu-icon value="undo"></mu-icon> Reset
+					</mu-button>
 					<br /><br />
-
 					Mode:
 					<mu-select @change="init" v-model="mode">
-						<mu-option
-							v-for="(option, index) in options"
-							:key="option"
-							:label="option"
-							:value="index"
-						></mu-option>
+						<mu-option v-for="(option, index) in options" :key="option" :label="option" :value="index"></mu-option>
 					</mu-select>
 					<br />
-					(Target) Frame Rate: {{ framerate }} FPS
-					<mu-slider
-						type="range"
-						:min="0"
-						:max="80"
-						:step="1"
-						value="50"
-						class="slider"
-						v-model="framerate"
-					/>
-					TTL: {{ ttl }}
-					<mu-slider
-						type="range"
-						:min="0"
-						:max="200"
-						:step="1"
-						value="50"
-						class="slider"
-						v-model="ttl"
-					/>
-					Noise covariance: {{ sigma }}
-					<mu-slider
-						:min="0"
-						:max="width / 3"
-						:step="1"
-						class="demo-slider"
-						v-model="sigma"
-					></mu-slider>
-					Prediction Steps : {{ predSteps }}
-					<mu-slider
-						:min="1"
-						:max="50"
-						:step="1"
-						class="demo-slider"
-						v-model="predSteps"
-					></mu-slider>
+					(Target) Frame Rate: <b>{{ framerate }}</b> FPS
+					<mu-slider type="range" :min="0" :max="80" :step="1" value="50" class="slider" v-model="framerate" />
+					TTL: <b>{{ ttl }} </b> frames
+					<mu-slider type="range" :min="0" :max="200" :step="1" value="50" class="slider" v-model="ttl" />
+					Noise covariance σ: <b>{{ sigma }}</b>
+					<mu-slider :min="0" :max="width / 3" :step="1" class="demo-slider" v-model="sigma"></mu-slider>
+					Prediction Steps : <b>{{ predSteps }}</b>
+					<mu-slider :min="1" :max="50" :step="1" class="demo-slider" v-model="predSteps"></mu-slider>
 					<!--
 					<mu-checkbox
 						v-model="traj"
 						label="Trajectory"
 					></mu-checkbox>-->
-					<mu-checkbox
-						v-model="drawReal"
-						label="Real Path"
-					></mu-checkbox>
-					<mu-checkbox
-						v-model="drawNoisy"
-						label="Noisy"
-					></mu-checkbox>
-					<mu-checkbox
-						v-model="drawNoisyTraj"
-						label="Noisy Path"
-					></mu-checkbox>
-					<mu-checkbox
-						v-model="drawFiltered"
-						label="Filtered"
-					></mu-checkbox>
-					<mu-checkbox
-						v-model="drawFilteredTraj"
-						label="Filtered Path"
-					></mu-checkbox>
-					<mu-checkbox
-						v-model="prediction"
-						label="Prediction"
-					></mu-checkbox>
+					Show:<br>
+					<mu-checkbox v-model="drawReal" label="Real Path"></mu-checkbox>
+					<mu-checkbox v-model="drawNoisy" label="Noisy"></mu-checkbox>
+					<mu-checkbox v-model="drawNoisyTraj" label="Noisy Path"></mu-checkbox><br>
+					<mu-checkbox v-model="drawFiltered" label="Filtered"></mu-checkbox>
+					<mu-checkbox v-model="drawFilteredTraj" label="Filtered Path"></mu-checkbox>
+					<mu-checkbox v-model="prediction" label="Prediction"></mu-checkbox>
 					<br><br>
 					Canvas<br>
 					Width: {{ width }}px<br />
-					<mu-slider
-						v-if="showCanvasControls"
-						type="range"
-						:min="0"
-						:max="1800"
-						:step="1"
-						value="75"
-						class="slider"
-						v-model="widthC"
-					/>
+					<mu-slider v-if="showCanvasControls" type="range" :min="0" :max="1800" :step="1" value="75" class="slider" v-model="widthC" />
 					Height: {{ height }}px<br />
-					<mu-slider
-						v-if="showCanvasControls"
-						type="range"
-						:min="0"
-						:max="1000"
-						:step="1"
-						value="75"
-						class="slider"
-						v-model="height"
-					/><br>
-					status: {{ status }}<br />
+					<mu-slider v-if="showCanvasControls" type="range" :min="0" :max="1000" :step="1" value="75" class="slider" v-model="height" /><br>
+					status: <code>{{ status }}</code><br />
 					<code>{{ states.length }}</code> states drawn.<br />
 					<code>{{ Math.round(ms) }}</code> ms per frame
-				</div></mu-col
-			>
-			<mu-col sm="12" md="12" lg="8" span="12"
-				>
+				</div>
+			</mu-col>
+			<mu-col sm="12" md="12" lg="8" span="12">
 				<div class="grid-cell">
-					<canvas
-						class="kalmandemo"
-						@mouseleave="mouseLeave"
-						@pointermove="mouseOver"
-						ref="ccont"
-						:width="widthC"
-						:height="heightC"
-					></canvas></div
-			></mu-col>
+					<canvas class="kalmandemo" @mouseleave="mouseLeave" @pointermove="mouseOver" ref="ccont" :width="widthC" :height="heightC"></canvas></div>
+			</mu-col>
 		</mu-row>
-
 		<br />
-
 		<br />
-
 		<span class="stats"> </span>
-
 		<mu-row gutter class="stats">
-			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"
-				></mu-col>
-			<mu-col style="font-size:16px;" sm="12" md="10" lg="8" span="12"
-				><center>
-<i>Kalman Filter is an algorithm that uses a series of measurements observed over time, containing statistical noise and other inaccuracies, and produces estimates of unknown variables that tend to be more accurate than those based on a single measurement alone, by estimating a joint probability distribution over the variables for each timeframe. Earliest applications include the <a href="https://github.com/chrislgarry/Apollo-11/blob/master/Luminary099/KALMAN_FILTER.agc">1969 Apollo 11 software</a>.</i></center></mu-col><mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"
-				></mu-col></mu-row>
-
-				<mu-col style="font-size:14px; padding-left: 15%;padding-right: 15%" sm="12" md="12" lg="12" span="12"
-				> <br><br></mu-col>
+			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"></mu-col>
+			<mu-col style="font-size:16px;" sm="12" md="10" lg="8" span="12">
+				<center>
+					<i>Kalman Filter is an algorithm that uses a series of measurements observed over time, containing statistical noise and other inaccuracies, and produces estimates of unknown variables that tend to be more accurate than those based on a single measurement alone, by estimating a joint probability distribution over the variables for each timeframe. Earliest applications include the <a href="https://github.com/chrislgarry/Apollo-11/blob/master/Luminary099/KALMAN_FILTER.agc">1969 Apollo 11 software</a>.</i></center>
+			</mu-col>
+			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"></mu-col>
+		</mu-row>
+		<mu-col style="font-size:14px; padding-left: 15%;padding-right: 15%" sm="12" md="12" lg="12" span="12"> <br><br></mu-col>
 		<small style="font-size:1rem">
 			<p>
-				
-					<a
-						style="color:#2c3e50;"
-						href="https://github.com/avivace/kalman"
-					>
-						<img
-							style="vertical-align: text-bottom;"
-							height="24px"
-							src="https://akveo.github.io/eva-icons/outline/svg/github-outline.svg"
-						/>&nbsp;Source Code</a>, <a style="color:#2c3e50;" href="https://github.com/avivace/kalman#references-and-papers"> references </a>
-					
-				
+				<a style="color:#2c3e50;" href="https://github.com/avivace/kalman">
+					<img style="vertical-align: text-bottom;" height="24px" src="https://akveo.github.io/eva-icons/outline/svg/github-outline.svg" />&nbsp;Source Code</a>,<a style="color:#2c3e50;" href="https://github.com/avivace/kalman/blob/develop/slides.pdf"> slides</a>, <a style="color:#2c3e50;" href="https://github.com/avivace/kalman#references-and-papers"> references </a>
 			</p>
 		</small>
 	</div>
@@ -228,7 +137,7 @@ Green points are artifically generated applying noise to the real input path acc
 				Math.pow(
 					Math.E,
 					-Math.pow(x - mean, 2) /
-						(2 * (standardDeviation * standardDeviation))
+					(2 * (standardDeviation * standardDeviation))
 				)
 			);
 		};
@@ -732,6 +641,7 @@ export default {
 a {
 	text-decoration: none;
 }
+
 .stats {
 	font-size: 1.2rem;
 }
@@ -741,7 +651,7 @@ a {
 	font-size: 3rem;
 	letter-spacing: -0.06em;
 	line-height: 1;
-	margin-bottom:0.1em;
+	margin-bottom: 0.1em;
 }
 
 .subtitle {
@@ -749,7 +659,7 @@ a {
 	font-size: 1.6rem;
 	letter-spacing: -0.05em;
 	line-height: 1;
-	margin-top:0;
+	margin-top: 0;
 }
 
 .kalmandemo {
