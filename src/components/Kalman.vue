@@ -1,10 +1,13 @@
 <template>
 	<div>
-		<h2 class="title">Kalman Filter 2D demo</h2>
-		<h3 class="subtitle">Antonio Vivace, June 2019</h3>
-
+		<h1 class="title">Kalman Filter 2D demo</h1>
+		<h3 class="subtitle">Antonio Vivace, June 2019</h3><mu-row gutter class="stats">
+			<mu-col style="padding-left: 15%;padding-right: 15%" sm="12" md="12" lg="12" span="12"
+				>
+Green points are artifically generated applying noise to the real input path according to the set covariance. This dirty path is then fed into the Kalman algorithm, which proceeds to clean it up. <br>Finally, the filtered path is shown in red. Check <a href="https://courses.engr.illinois.edu/ece420/sp2017/UnderstandingKalmanFilter.pdf">here</a> for a detailed explanation of the intuition behind the this. <br><br>Select "Mouse" as mode and then hover your mouse on the canvas to draw path yourself.</mu-col></mu-row><br>
+<br>
 		<mu-row gutter class="stats">
-			<mu-col style="padding: 15px" sm="12" md="12" lg="3" span="12"
+			<mu-col style="padding-left:5%;padding-right:2.5%; padding: 15px" sm="12" md="12" lg="4" span="12"
 				><div class="grid-cell">
 					<mu-button @click="handleStartButton" :color="startBtnColor"
 						><mu-icon :value="startBtnIcon"></mu-icon
@@ -25,7 +28,7 @@
 						></mu-option>
 					</mu-select>
 					<br />
-					Frame Rate: {{ framerate }} FPS
+					(Target) Frame Rate: {{ framerate }} FPS
 					<mu-slider
 						type="range"
 						:min="0"
@@ -45,29 +48,6 @@
 						class="slider"
 						v-model="ttl"
 					/>
-					Width: {{ width }}px<br />
-					<mu-slider
-						v-if="showCanvasControls"
-						type="range"
-						:min="0"
-						:max="1800"
-						:step="1"
-						value="75"
-						class="slider"
-						v-model="widthC"
-					/>
-					Height: {{ height }}px<br />
-					<mu-slider
-						v-if="showCanvasControls"
-						type="range"
-						:min="0"
-						:max="1000"
-						:step="1"
-						value="75"
-						class="slider"
-						v-model="height"
-					/>
-
 					Noise covariance: {{ sigma }}
 					<mu-slider
 						:min="0"
@@ -113,14 +93,38 @@
 						v-model="prediction"
 						label="Prediction"
 					></mu-checkbox>
-					<h4>Stats</h4>
-					{{ status }}<br />
+					<br><br>
+					Canvas<br>
+					Width: {{ width }}px<br />
+					<mu-slider
+						v-if="showCanvasControls"
+						type="range"
+						:min="0"
+						:max="1800"
+						:step="1"
+						value="75"
+						class="slider"
+						v-model="widthC"
+					/>
+					Height: {{ height }}px<br />
+					<mu-slider
+						v-if="showCanvasControls"
+						type="range"
+						:min="0"
+						:max="1000"
+						:step="1"
+						value="75"
+						class="slider"
+						v-model="height"
+					/><br>
+					status: {{ status }}<br />
 					<code>{{ states.length }}</code> states drawn.<br />
 					<code>{{ Math.round(ms) }}</code> ms per frame
 				</div></mu-col
 			>
-			<mu-col sm="12" md="12" lg="9" span="12"
-				><div class="grid-cell">
+			<mu-col sm="12" md="12" lg="8" span="12"
+				>
+				<div class="grid-cell">
 					<canvas
 						class="kalmandemo"
 						@mouseleave="mouseLeave"
@@ -139,18 +143,18 @@
 		<span class="stats"> </span>
 		<small style="font-size:1rem">
 			<p>
-				<b
-					><a
-						style="color:#2c3e50"
+				
+					<a
+						style="color:#2c3e50;"
 						href="https://github.com/avivace/kalman"
 					>
 						<img
 							style="vertical-align: text-bottom;"
 							height="24px"
 							src="https://akveo.github.io/eva-icons/outline/svg/github-outline.svg"
-						/>&nbsp;Source Code</a
-					></b
-				>
+						/>&nbsp;Source Code</a>, <a style="color:#2c3e50;" href="https://github.com/avivace/kalman#references-and-papers"> references </a>
+					
+				
 			</p>
 		</small>
 	</div>
@@ -250,7 +254,7 @@ export default {
 		options: ["Mouse", "Square Path", "1D", "Random Path"],
 		realPoint: null,
 		drawPhase: 0,
-		sigma: 50,
+		sigma: 15,
 		startBtnText: "Start",
 		startBtnIcon: "play_arrow",
 		startBtnColor: "blue",
@@ -273,6 +277,7 @@ export default {
 		var c = this.$refs.ccont;
 		this.ctx = c.getContext("2d", { alpha: false });
 		this.ctx.scale(2, 2);
+		this.handleStartButton();
 	},
 	methods: {
 		handleStartButton() {
@@ -424,7 +429,7 @@ export default {
 						(this.ttl * 255) / self.ttl
 					).toString(16);
 					this.ctx.beginPath();
-					this.ctx.arc(this.x, this.y, 1.5, 0, 2 * Math.PI);
+					this.ctx.arc(this.x, this.y, 1.25, 0, 2 * Math.PI);
 					this.ctx.fillStyle = color + alpha;
 
 					this.ctx.fill();
@@ -679,8 +684,8 @@ export default {
 						if (this.drawFilteredTraj) {
 							var p1 = state.getK();
 							var p2 = this.states[i - 1].getK();
-							ctx.strokeStyle = "#992200" + alpha;
-							ctx.lineWidth = 2;
+							ctx.strokeStyle = "#993399" + alpha;
+							ctx.lineWidth = 1.5;
 							ctx.beginPath();
 							ctx.moveTo(p1[0], p1[1]);
 							ctx.lineTo(p2[0], p2[1]);
