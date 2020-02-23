@@ -6,7 +6,7 @@
 			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"></mu-col>
 			<mu-col style="font-size:18px;" sm="12" md="10" lg="8" span="12">
 				<center>
-					Green points are artifically generated applying noise to the real input path according to the set covariance. This dirty path is then fed into the Kalman algorithm, which proceeds to clean it up. Finally, the filtered path is shown in red. Check <a href="https://courses.engr.illinois.edu/ece420/sp2017/UnderstandingKalmanFilter.pdf">here</a> for an intuitive explanation of the math behind this. <br><br>Select "Mouse" as mode and then hover your mouse on the canvas to draw path yourself.</center>
+					Green points are artificially generated applying noise to the real input path according to the set covariance. This dirty path is then fed into the Kalman algorithm, which proceeds to clean it up. Finally, the filtered path is shown in red. Check <a href="https://courses.engr.illinois.edu/ece420/sp2017/UnderstandingKalmanFilter.pdf">here</a> for an intuitive explanation of the math behind this. <br><br>Select "Mouse" as mode and then hover your mouse on the canvas to draw the path yourself.</center>
 			</mu-col>
 			<mu-col style="font-size:16px;" sm="0" md="1" lg="2" span="12"></mu-col>
 		</mu-row><br>
