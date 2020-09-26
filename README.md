@@ -1,6 +1,6 @@
 # Kalman Filter
 
-Final project for the *Probabilistic models for decision making* course, from my MSc: *an interactive and real time 2D simulation of the Kalman Filter in use to reduce input noise*.
+Final project for the *Probabilistic models for decision making* course, from my [MSc in Computer Science](https://github.com/avivace): *an interactive and real time 2D simulation of the Kalman Filter in use to reduce input noise*.
 
 ### [Live demo](https://avivace.github.io/kalman)
 
